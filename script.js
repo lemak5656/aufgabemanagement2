@@ -129,3 +129,17 @@ async function deleteTask(taskId) {
     await deleteDoc(doc(db, "tasks", taskId));
     document.querySelector(`li[data-id='${taskId}']`).remove(); // Entfernt die Aufgabe aus der Ansicht
 }
+// Funktion zur Navigation
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('section');
+    sections.forEach(section => {
+        section.classList.remove('active');
+    });
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+}
+
+// Explizit in den globalen Bereich exportieren
+window.showSection = showSection;
