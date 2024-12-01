@@ -1,6 +1,6 @@
 // Firebase-Konfiguration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
@@ -72,13 +72,24 @@ async function saveTaskToDatabase(haus, problem, priorität, foto) {
 // Aufgaben aus Firebase laden und rendern
 async function loadTasks() {
     onSnapshot(collection(db, "tasks"), (snapshot) => {
-        document.getElementById("meldungenList").innerHTML = "";
-        document.getElementById("aufgabenList").innerHTML = "";
-        document.getElementById("archivList").innerHTML = "";
+        // Alle Listen zurücksetzen
+        const meldungenList = document.getElementById("meldungenList");
+        const aufgabenList = document.getElementById("aufgabenList");
+        const archivList = document.getElementById("archivList");
 
+        if (meldungenList) meldungenList.innerHTML = "";
+        if (aufgabenList) aufgabenList.innerHTML = "";
+        if (archivList) archivList.innerHTML = "";
+
+        // Aufgaben hinzufügen
         snapshot.forEach((doc) => {
             const task = { id: doc.id, ...doc.data() };
-            renderTask(task, `${task.status}List`);
+            const targetList = `${task.status}List`;
+            if (document.getElementById(targetList)) {
+                renderTask(task, targetList);
+            } else {
+                console.error(`Liste ${targetList} existiert nicht.`);
+            }
         });
     });
 }
@@ -86,6 +97,13 @@ async function loadTasks() {
 // Aufgaben rendern
 function renderTask(task, listId) {
     const list = document.getElementById(listId);
+
+    // Überprüfen, ob die Liste existiert
+    if (!list) {
+        console.error(`Liste mit ID ${listId} existiert nicht.`);
+        return;
+    }
+
     const listItem = document.createElement('li');
 
     listItem.innerHTML = `
@@ -171,35 +189,6 @@ async function deleteTask(taskId) {
         console.error("Fehler beim Löschen der Aufgabe:", error);
     }
 }
-
-// Aufgaben filtern
-function filterTasks(listId, filterInputId) {
-    const filter = document.getElementById(filterInputId).value.toLowerCase();
-    const tasks = document.querySelectorAll(`#${listId} li`);
-    tasks.forEach(task => {
-        const content = task.textContent.toLowerCase();
-        task.style.display = content.includes(filter) ? "block" : "none";
-    });
-}
-
-document.getElementById('meldungenFilter').addEventListener('input', () => filterTasks('meldungenList', 'meldungenFilter'));
-document.getElementById('aufgabenFilter').addEventListener('input', () => filterTasks('aufgabenList', 'aufgabenFilter'));
-
-// Aufgaben drucken
-function printSelectedTasks(listId) {
-    const tasks = document.querySelectorAll(`#${listId} li .task-checkbox:checked`);
-    const selectedTasks = Array.from(tasks).map(task => {
-        const parent = task.parentElement;
-        return parent.textContent.trim();
-    }).join('\n\n');
-
-    const newWindow = window.open('', '', 'width=600,height=400');
-    newWindow.document.write('<pre>' + selectedTasks + '</pre>');
-    newWindow.print();
-    newWindow.close();
-}
-
-window.printSelectedTasks = printSelectedTasks;
 
 // Aufgaben laden
 loadTasks();
