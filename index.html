@@ -5,55 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aufgabenmanagement</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        nav {
-            background-color: #333;
-            color: white;
+        /* Passwortschutz */
+        #login-container {
             display: flex;
-            justify-content: space-around;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f3f3f3;
+        }
+
+        #login-container input {
+            margin: 10px;
             padding: 10px;
+            font-size: 16px;
         }
 
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
+        #login-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
         }
 
-        nav a:hover {
-            text-decoration: underline;
+        #main-content {
+            display: none;
         }
 
+        /* Aufgabenmanagement */
         section {
             display: none;
-            padding: 20px;
         }
 
         section.active {
             display: block;
-        }
-
-        form {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #f4f4f4;
-            border-radius: 5px;
-        }
-
-        form label {
-            font-weight: bold;
-        }
-
-        form input, form textarea, form select, form button {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
         }
 
         ul {
@@ -62,98 +46,74 @@
         }
 
         li {
-            background: #f9f9f9;
             margin: 10px 0;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 5px;
         }
 
-        li img {
-            max-width: 200px;
-            display: block;
-            margin-top: 10px;
+        li.erledigt {
+            background-color: #d4edda;
+            color: #155724;
         }
 
-        button, select {
-            margin-top: 5px;
-        }
-
-        .filter, .print-section {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 10px;
-            background: #f4f4f4;
-            border-radius: 5px;
-        }
-
-        .filter input, .print-section button {
-            width: calc(100% - 20px);
-            padding: 10px;
+        li.nichterledigt {
+            background-color: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="#" onclick="showSection('eintrag')">Eintrag</a>
-        <a href="#" onclick="showSection('meldungen')">Meldung Gekommen</a>
-        <a href="#" onclick="showSection('aufgaben')">Offene Aufgaben</a>
-        <a href="#" onclick="showSection('archiv')">Archiviert</a>
-    </nav>
+    <!-- Passwortschutz -->
+    <div id="login-container">
+        <h1>Passwort eingeben</h1>
+        <input type="password" id="password-input" placeholder="Passwort">
+        <button id="login-button">Einloggen</button>
+    </div>
 
-    <!-- Eintrag -->
-    <section id="eintrag" class="active">
-        <h2>Neue Aufgabe hinzufügen</h2>
-        <form id="taskForm">
-            <label for="haus">Haus:</label>
-            <input type="text" id="haus" name="haus" required>
+    <!-- Hauptinhalt -->
+    <div id="main-content">
+        <nav>
+            <button onclick="showSection('meldungen')">Meldung Gekommen</button>
+            <button onclick="showSection('aufgaben')">Offene Aufgaben</button>
+            <button onclick="showSection('archiv')">Archiv</button>
+        </nav>
 
-            <label for="problem">Problem:</label>
-            <textarea id="problem" name="problem" required></textarea>
+        <!-- Meldungen -->
+        <section id="meldungen">
+            <h2>Meldung Gekommen</h2>
+            <ul id="meldungenList"></ul>
+        </section>
 
-            <label for="priorität">Priorität:</label>
-            <select id="priorität" name="priorität" required>
-                <option value="Niedrig">Niedrig</option>
-                <option value="Mittel">Mittel</option>
-                <option value="Hoch">Hoch</option>
-            </select>
+        <!-- Offene Aufgaben -->
+        <section id="aufgaben">
+            <h2>Offene Aufgaben</h2>
+            <ul id="aufgabenList"></ul>
+        </section>
 
-            <label for="foto">Foto hochladen:</label>
-            <input type="file" id="foto" name="foto" accept="image/*">
+        <!-- Archiv -->
+        <section id="archiv">
+            <h2>Archiv</h2>
+            <ul id="archivList"></ul>
+        </section>
 
-            <button type="submit">Hinzufügen</button>
-        </form>
-    </section>
+        <!-- Aufgabe hinzufügen -->
+        <section id="add-task">
+            <h2>Neue Aufgabe hinzufügen</h2>
+            <form id="taskForm">
+                <input type="text" id="haus" placeholder="Haus" required>
+                <input type="text" id="problem" placeholder="Problem" required>
+                <select id="priorität" required>
+                    <option value="Hoch">Hoch</option>
+                    <option value="Mittel">Mittel</option>
+                    <option value="Niedrig">Niedrig</option>
+                </select>
+                <input type="file" id="foto" accept="image/*">
+                <button type="submit">Aufgabe hinzufügen</button>
+            </form>
+        </section>
+    </div>
 
-    <!-- Meldung Gekommen -->
-    <section id="meldungen">
-        <h2>Meldung Gekommen</h2>
-        <div class="filter">
-            <label for="meldungenFilter">Filtern:</label>
-            <input type="text" id="meldungenFilter" placeholder="Nach Haus, Problem, Priorität suchen...">
-        </div>
-        <ul id="meldungenList"></ul>
-    </section>
-
-    <!-- Offene Aufgaben -->
-    <section id="aufgaben">
-        <h2>Offene Aufgaben</h2>
-        <div class="filter">
-            <label for="aufgabenFilter">Filtern:</label>
-            <input type="text" id="aufgabenFilter" placeholder="Nach Haus, Problem, Priorität suchen...">
-        </div>
-        <ul id="aufgabenList"></ul>
-        <div class="print-section">
-            <button onclick="printSelectedTasks('aufgabenList')">Ausgewählte Aufgaben drucken</button>
-        </div>
-    </section>
-
-    <!-- Archiviert -->
-    <section id="archiv">
-        <h2>Archiviert</h2>
-        <ul id="archivList"></ul>
-    </section>
-
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
