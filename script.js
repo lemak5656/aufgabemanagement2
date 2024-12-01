@@ -1,6 +1,6 @@
 // Firebase-Konfiguration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -27,7 +27,7 @@ function showSection(sectionId) {
 
 window.showSection = showSection; // Funktion global verfügbar machen
 
-// Aufgabe hinzufügen
+// Aufgaben hinzufügen
 async function addTask() {
     const haus = document.getElementById('haus').value;
     const problem = document.getElementById('problem').value;
@@ -50,29 +50,32 @@ async function addTask() {
         foto: fotoURL,
         status: 'meldungen',
         abteilung: 'Keine',
+        kommentare: [],
         timestamp: new Date()
     };
 
     try {
         const docRef = await addDoc(collection(db, "tasks"), task);
         console.log("Aufgabe hinzugefügt mit ID:", docRef.id);
-        renderTask({ id: docRef.id, ...task }, 'meldungenList');
         document.getElementById('taskForm').reset();
     } catch (error) {
         console.error("Fehler beim Hinzufügen der Aufgabe:", error);
     }
 }
 
-// Aufgaben laden
-async function loadTasks() {
-    const querySnapshot = await getDocs(collection(db, "tasks"));
-    querySnapshot.forEach(doc => {
+// Aufgaben laden und live aktualisieren
+onSnapshot(collection(db, "tasks"), snapshot => {
+    document.getElementById("meldungenList").innerHTML = "";
+    document.getElementById("aufgabenList").innerHTML = "";
+    document.getElementById("archivList").innerHTML = "";
+
+    snapshot.forEach(doc => {
         const task = { id: doc.id, ...doc.data() };
         renderTask(task, `${task.status}List`);
     });
-}
+});
 
-// Aufgaben anzeigen
+// Aufgaben rendern
 function renderTask(task, listId) {
     const list = document.getElementById(listId);
     const listItem = document.createElement('li');
@@ -80,61 +83,22 @@ function renderTask(task, listId) {
         <strong>Haus:</strong> ${task.haus}<br>
         <strong>Problem:</strong> ${task.problem}<br>
         <strong>Priorität:</strong> ${task.priorität}<br>
+        <strong>Abteilung:</strong> ${task.abteilung}<br>
         ${task.foto ? `<img src="${task.foto}" alt="Foto">` : ''}
     `;
 
     const actions = document.createElement('div');
 
     if (listId === 'meldungenList') {
+        const abteilungSelect = document.createElement('select');
+        abteilungSelect.innerHTML = `
+            <option value="Hausverwaltung">Hausverwaltung</option>
+            <option value="Hausmeister">Hausmeister</option>
+            <option value="Rezeption">Rezeption</option>
+        `;
+        abteilungSelect.addEventListener('change', async () => {
+            await updateTask(task.id, { abteilung: abteilungSelect.value });
+        });
+
         const inArbeitButton = document.createElement('button');
-        inArbeitButton.textContent = 'In Arbeit setzen';
-        inArbeitButton.addEventListener('click', async () => {
-            await updateTaskStatus(task.id, 'aufgaben');
-            listItem.remove();
-        });
-
-        actions.appendChild(inArbeitButton);
-    } else if (listId === 'aufgabenList') {
-        const erledigtButton = document.createElement('button');
-        erledigtButton.textContent = 'Erledigt';
-        erledigtButton.addEventListener('click', async () => {
-            await updateTaskStatus(task.id, 'archiv');
-            listItem.remove();
-        });
-
-        actions.appendChild(erledigtButton);
-    } else if (listId === 'archivList') {
-        const löschenButton = document.createElement('button');
-        löschenButton.textContent = 'Löschen';
-        löschenButton.addEventListener('click', async () => {
-            await deleteTask(task.id);
-            listItem.remove();
-        });
-
-        actions.appendChild(löschenButton);
-    }
-
-    listItem.appendChild(actions);
-    list.appendChild(listItem);
-}
-
-// Status aktualisieren
-async function updateTaskStatus(taskId, newStatus) {
-    const taskRef = doc(db, "tasks", taskId);
-    await updateDoc(taskRef, { status: newStatus });
-}
-
-// Aufgabe löschen
-async function deleteTask(taskId) {
-    const taskRef = doc(db, "tasks", taskId);
-    await deleteDoc(taskRef);
-}
-
-// Event-Listener
-document.getElementById('taskForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    await addTask();
-    showSection('meldungen');
-});
-
-document.addEventListener('DOMContentLoaded', loadTasks);
+        inArbeitButton.textContent
