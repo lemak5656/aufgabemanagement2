@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Ersetze durch deinen Schlüssel
+const imgbbApiKey = "DEIN_API_SCHLÜSSEL_HIER"; // Ersetze durch deinen Schlüssel
 
 // Passwortschutz
 const PASSWORD = "uplandparcs"; // Passwort
