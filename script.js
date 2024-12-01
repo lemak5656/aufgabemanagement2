@@ -36,6 +36,7 @@ async function addTask() {
         problem,
         priorität,
         status: 'meldungen',
+        abteilung: 'Keine',
         timestamp: new Date()
     };
 
@@ -62,14 +63,91 @@ async function loadTasks() {
 function renderTask(task, listId) {
     const list = document.getElementById(listId);
     const listItem = document.createElement('li');
+    listItem.setAttribute('data-id', task.id);
+
     listItem.innerHTML = `
         <strong>Haus:</strong> ${task.haus}<br>
         <strong>Problem:</strong> ${task.problem}<br>
-        <strong>Priorität:</strong> ${task.priorität}
+        <strong>Priorität:</strong> ${task.priorität}<br>
+        <strong>Abteilung:</strong> ${task.abteilung}<br>
     `;
+
+    const actions = document.createElement('div');
+
+    // Buttons für Meldungen
+    if (listId === 'meldungenList') {
+        const abteilungSelect = document.createElement('select');
+        abteilungSelect.innerHTML = `
+            <option value="Hausverwaltung">Hausverwaltung</option>
+            <option value="Hausmeister">Hausmeister</option>
+            <option value="Rezeption">Rezeption</option>
+        `;
+        abteilungSelect.addEventListener('change', async () => {
+            await updateTask(task.id, { abteilung: abteilungSelect.value });
+            listItem.querySelector('strong:nth-child(5)').textContent = `Abteilung: ${abteilungSelect.value}`;
+        });
+
+        const inArbeitButton = document.createElement('button');
+        inArbeitButton.textContent = 'In Arbeit setzen';
+        inArbeitButton.addEventListener('click', async () => {
+            await updateTaskStatus(task.id, 'aufgaben');
+            listItem.remove();
+        });
+
+        actions.appendChild(abteilungSelect);
+        actions.appendChild(inArbeitButton);
+    }
+
+    // Buttons für Offene Aufgaben
+    if (listId === 'aufgabenList') {
+        const erledigtButton = document.createElement('button');
+        erledigtButton.textContent = 'Erledigt';
+        erledigtButton.addEventListener('click', async () => {
+            await updateTaskStatus(task.id, 'archiv');
+            listItem.remove();
+        });
+
+        actions.appendChild(erledigtButton);
+    }
+
+    // Buttons für Archiv
+    if (listId === 'archivList') {
+        const löschenButton = document.createElement('button');
+        löschenButton.textContent = 'Löschen';
+        löschenButton.addEventListener('click', async () => {
+            await deleteTask(task.id);
+            listItem.remove();
+        });
+
+        actions.appendChild(löschenButton);
+    }
+
+    listItem.appendChild(actions);
     list.appendChild(listItem);
 }
 
+// Aufgabenstatus aktualisieren
+async function updateTaskStatus(taskId, newStatus) {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, { status: newStatus });
+    console.log(`Status der Aufgabe ${taskId} auf ${newStatus} geändert.`);
+}
+
+// Aufgaben aktualisieren (z. B. Abteilung ändern)
+async function updateTask(taskId, updates) {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, updates);
+    console.log(`Aufgabe ${taskId} aktualisiert:`, updates);
+}
+
+// Aufgabe löschen
+async function deleteTask(taskId) {
+    const taskRef = doc(db, "tasks", taskId);
+    await deleteDoc(taskRef);
+    console.log(`Aufgabe ${taskId} gelöscht.`);
+}
+
+// Event Listener
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     await addTask();
