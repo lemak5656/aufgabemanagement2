@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aufgabenmanagement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        nav {
+            background-color: #007bff;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        section {
+            display: none;
+        }
+        section.active {
+            display: block;
+        }
+        form, table {
+            max-width: 800px;
+            margin: 0 auto;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        label, h2 {
+            font-weight: bold;
+            color: #007bff;
+        }
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a onclick="showPage('eintrag')">Eintrag</a>
+    <a onclick="showPage('aufgaben')">Offene Aufgaben</a>
+    <a onclick="showPage('meldungen')">Meldung Gekommen</a>
+    <a onclick="showPage('archiv')">Archiviert</a>
+</nav>
+
+<section id="eintrag" class="active">
+    <form id="task-form">
+        <h2>Neue Aufgabe hinzufügen</h2>
+        <label for="haus">Haus</label>
+        <input type="text" id="haus" placeholder="Hausnummer oder -name" required>
+        <label for="problem">Problem</label>
+        <textarea id="problem" placeholder="Beschreiben Sie das Problem" required></textarea>
+        <label for="priorität">Priorität</label>
+        <select id="priorität" required>
+            <option value="Niedrig">Niedrig</option>
+            <option value="Mittel">Mittel</option>
+            <option value="Hoch">Hoch</option>
+        </select>
+        <button type="submit">Hinzufügen</button>
+    </form>
+</section>
+
+<section id="aufgaben">
+    <h2>Offene Aufgaben</h2>
+    <table id="task-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Priorität</th>
+                <th>Status</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
+</section>
+
+<section id="meldungen">
+    <h2>Meldung Gekommen</h2>
+    <table id="meldung-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Priorität</th>
+                <th>Status</th>
+                <th>Abteilung</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
+</section>
+
+<section id="archiv">
+    <h2>Archivierte Aufgaben</h2>
+    <table id="archive-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Priorität</th>
+                <th>Status</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
+        authDomain: "aufgabemanagement.firebaseapp.com",
+        databaseURL: "https://aufgabemanagement.firebaseio.com",
+        projectId: "aufgabemanagement",
+        storageBucket: "aufgabemanagement.appspot.com",
+        messagingSenderId: "868800147456",
+        appId: "1:868800147456:web:f4f8cc2e39100f819a68e5",
+        measurementId: "G-NSPT7LPEQ0"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function showPage(pageId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    document.getElementById('task-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const haus = document.getElementById('haus').value;
+        const problem = document.getElementById('problem').value;
+        const priorität = document.getElementById('priorität').value;
+
+        await db.ref('tasks').push({
+            haus,
+            problem,
+            priorität,
+            status: 'Offen'
+        });
+        this.reset();
+        loadTasks();
+    });
+
+    async function loadTasks() {
+        const snapshot = await db.ref('tasks').once('value');
+        const tasks = snapshot.val() || {};
+        const tbody = document.querySelector('#task-table tbody');
+        tbody.innerHTML = '';
+
+        Object.keys(tasks).forEach((key, index) => {
+            const task = tasks[key];
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${task.haus}</td>
+                    <td>${task.problem}</td>
+                    <td>${task.priorität}</td>
+                    <td>${task.status}</td>
+                    <td><button onclick="archiveTask('${key}')">Archivieren</button></td>
+                </tr>`;
+        });
+    }
+
+    async function archiveTask(taskId) {
+        const taskRef = db.ref(`tasks/${taskId}`);
+        const snapshot = await taskRef.once('value');
+        const task = snapshot.val();
+        await db.ref('archive').push(task);
+       
