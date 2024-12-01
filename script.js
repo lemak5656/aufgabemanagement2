@@ -100,6 +100,7 @@ function renderTask(task, listId) {
         `;
         abteilungSelect.addEventListener('change', async () => {
             await updateTask(task.id, { abteilung: abteilungSelect.value });
+            console.log(`Abteilung aktualisiert für Aufgabe ${task.id}`);
         });
 
         const inArbeitButton = document.createElement('button');
