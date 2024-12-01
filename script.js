@@ -1,4 +1,7 @@
 // Firebase-Konfiguration
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
     authDomain: "aufgabemanagement.firebaseapp.com",
@@ -10,16 +13,16 @@ const firebaseConfig = {
 };
 
 // Firebase initialisieren
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', () => {
     showSection('eintrag');
 
     const taskForm = document.getElementById('taskForm');
-    taskForm.addEventListener('submit', function(event) {
+    taskForm.addEventListener('submit', async function (event) {
         event.preventDefault();
-        addTask();
+        await addTask();
     });
 
     loadTasks();
@@ -33,31 +36,30 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
-function addTask() {
+async function addTask() {
     const haus = document.getElementById('haus').value;
     const problem = document.getElementById('problem').value;
     const priorität = document.getElementById('priorität').value;
     const fotoInput = document.getElementById('foto');
-    const foto = fotoInput.files[0];
+    const foto = fotoInput.files[0] ? URL.createObjectURL(fotoInput.files[0]) : null;
 
     const task = {
         haus,
         problem,
         priorität,
-        foto: foto ? URL.createObjectURL(foto) : null,
+        foto,
         status: 'meldungen',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: new Date()
     };
 
-    db.collection('tasks').add(task)
-        .then((docRef) => {
-            console.log("Aufgabe hinzugefügt mit ID: ", docRef.id);
-            renderTask({ id: docRef.id, ...task }, 'meldungenList');
-            document.getElementById('taskForm').reset();
-        })
-        .catch((error) => {
-            console.error("Fehler beim Hinzufügen der Aufgabe: ", error);
-        });
+    try {
+        const docRef = await addDoc(collection(db, "tasks"), task);
+        console.log("Aufgabe hinzugefügt mit ID: ", docRef.id);
+        renderTask({ id: docRef.id, ...task }, 'meldungenList');
+        document.getElementById('taskForm').reset();
+    } catch (error) {
+        console.error("Fehler beim Hinzufügen der Aufgabe: ", error);
+    }
 }
 
 function renderTask(task, listId) {
@@ -74,6 +76,48 @@ function renderTask(task, listId) {
     if (task.foto) {
         const img = document.createElement('img');
         img.src = task.foto;
-        listItem
-::contentReference[oaicite:0]{index=0}
- 
+        listItem.appendChild(img);
+    }
+
+    const actions = document.createElement('div');
+
+    if (listId === 'meldungenList') {
+        const inArbeitButton = document.createElement('button');
+        inArbeitButton.textContent = 'In Arbeit setzen';
+        inArbeitButton.addEventListener('click', () => updateTaskStatus(task.id, 'aufgaben'));
+        actions.appendChild(inArbeitButton);
+    } else if (listId === 'aufgabenList') {
+        const archivierenButton = document.createElement('button');
+        archivierenButton.textContent = 'Archivieren';
+        archivierenButton.addEventListener('click', () => updateTaskStatus(task.id, 'archiv'));
+        actions.appendChild(archivierenButton);
+    } else if (listId === 'archivList') {
+        const löschenButton = document.createElement('button');
+        löschenButton.textContent = 'Löschen';
+        löschenButton.addEventListener('click', () => deleteTask(task.id));
+        actions.appendChild(löschenButton);
+    }
+
+    listItem.appendChild(actions);
+    list.appendChild(listItem);
+}
+
+async function loadTasks() {
+    const querySnapshot = await getDocs(collection(db, "tasks"));
+    querySnapshot.forEach((doc) => {
+        const task = { id: doc.id, ...doc.data() };
+        renderTask(task, `${task.status}List`);
+    });
+}
+
+async function updateTaskStatus(taskId, newStatus) {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, { status: newStatus });
+    document.querySelector(`li[data-id='${taskId}']`).remove();
+    loadTasks();
+}
+
+async function deleteTask(taskId) {
+    await deleteDoc(doc(db, "tasks", taskId));
+    document.querySelector(`li[data-id='${taskId}']`).remove();
+}
