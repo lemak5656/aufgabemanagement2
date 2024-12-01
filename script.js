@@ -48,7 +48,7 @@ async function addTask() {
         problem,
         priorität,
         foto: fotoURL,
-        status: 'meldungen', // Standardmäßig "Meldung Gekommen"
+        status: 'meldungen',
         abteilung: 'Keine',
         kommentare: [],
         timestamp: new Date(),
@@ -58,7 +58,7 @@ async function addTask() {
         await addDoc(collection(db, "tasks"), task);
         console.log("Aufgabe erfolgreich hinzugefügt.");
         document.getElementById('taskForm').reset();
-        showSection('meldungen'); // Nach Hinzufügen zu "Meldungen" wechseln
+        showSection('meldungen');
     } catch (error) {
         console.error("Fehler beim Hinzufügen der Aufgabe:", error);
     }
@@ -91,6 +91,17 @@ function renderTask(task, listId) {
     const actions = document.createElement('div');
 
     if (listId === 'meldungenList') {
+        const abteilungSelect = document.createElement('select');
+        abteilungSelect.innerHTML = `
+            <option value="Keine" ${task.abteilung === "Keine" ? "selected" : ""}>Keine</option>
+            <option value="Hausverwaltung" ${task.abteilung === "Hausverwaltung" ? "selected" : ""}>Hausverwaltung</option>
+            <option value="Hausmeister" ${task.abteilung === "Hausmeister" ? "selected" : ""}>Hausmeister</option>
+            <option value="Rezeption" ${task.abteilung === "Rezeption" ? "selected" : ""}>Rezeption</option>
+        `;
+        abteilungSelect.addEventListener('change', async () => {
+            await updateTask(task.id, { abteilung: abteilungSelect.value });
+        });
+
         const inArbeitButton = document.createElement('button');
         inArbeitButton.textContent = 'In Arbeit setzen';
         inArbeitButton.addEventListener('click', async () => {
@@ -98,11 +109,12 @@ function renderTask(task, listId) {
             listItem.remove();
         });
 
+        actions.appendChild(abteilungSelect);
         actions.appendChild(inArbeitButton);
     } else if (listId === 'aufgabenList') {
         const kommentarInput = document.createElement('textarea');
         kommentarInput.placeholder = "Kommentar hinzufügen";
-        kommentarInput.value = task.kommentare.join("\n"); // Kommentare anzeigen
+        kommentarInput.value = task.kommentare.join("\n");
         kommentarInput.addEventListener('change', async () => {
             const kommentar = kommentarInput.value.trim();
             const kommentare = kommentar.split("\n").filter(k => k.trim() !== "");
@@ -140,12 +152,26 @@ async function updateTaskStatus(taskId, newStatus) {
     console.log(`Status der Aufgabe ${taskId} wurde auf ${newStatus} aktualisiert.`);
 }
 
-// Aufgabenattribute aktualisieren (z. B. Kommentare hinzufügen)
+// Aufgabenattribute aktualisieren (z. B. Abteilung oder Kommentare hinzufügen)
 async function updateTask(taskId, updates) {
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, updates);
     console.log(`Aufgabe ${taskId} wurde aktualisiert:`, updates);
 }
+
+// Aufgaben filtern
+function filterTasks(listId, filterInputId) {
+    const filter = document.getElementById(filterInputId).value.toLowerCase();
+    const tasks = document.querySelectorAll(`#${listId} li`);
+    tasks.forEach(task => {
+        const haus = task.querySelector("strong").innerText.toLowerCase();
+        task.style.display = haus.includes(filter) || filter === "" ? "block" : "none";
+    });
+}
+
+// Event-Listener für Filter
+document.getElementById('meldungenFilter').addEventListener('input', () => filterTasks('meldungenList', 'meldungenFilter'));
+document.getElementById('aufgabenFilter').addEventListener('input', () => filterTasks('aufgabenList', 'aufgabenFilter'));
 
 // Aufgabe löschen
 async function deleteTask(taskId) {
@@ -156,6 +182,6 @@ async function deleteTask(taskId) {
 
 // Event-Listener
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
-    event.preventDefault(); // Verhindert das Neuladen der Seite
+    event.preventDefault();
     await addTask();
 });
