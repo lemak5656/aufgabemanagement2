@@ -48,7 +48,7 @@ async function addTask() {
         problem,
         priorität,
         foto: fotoURL,
-        status: 'aufgaben',
+        status: 'meldungen', // Standardmäßig "Meldung Gekommen"
         abteilung: 'Keine',
         kommentare: [],
         timestamp: new Date(),
@@ -58,7 +58,7 @@ async function addTask() {
         await addDoc(collection(db, "tasks"), task);
         console.log("Aufgabe erfolgreich hinzugefügt.");
         document.getElementById('taskForm').reset();
-        showSection('aufgaben');
+        showSection('meldungen'); // Nach Hinzufügen zu "Meldungen" wechseln
     } catch (error) {
         console.error("Fehler beim Hinzufügen der Aufgabe:", error);
     }
@@ -90,7 +90,16 @@ function renderTask(task, listId) {
 
     const actions = document.createElement('div');
 
-    if (listId === 'aufgabenList') {
+    if (listId === 'meldungenList') {
+        const inArbeitButton = document.createElement('button');
+        inArbeitButton.textContent = 'In Arbeit setzen';
+        inArbeitButton.addEventListener('click', async () => {
+            await updateTaskStatus(task.id, 'aufgaben');
+            listItem.remove();
+        });
+
+        actions.appendChild(inArbeitButton);
+    } else if (listId === 'aufgabenList') {
         const kommentarInput = document.createElement('textarea');
         kommentarInput.placeholder = "Kommentar hinzufügen";
         kommentarInput.value = task.kommentare.join("\n"); // Kommentare anzeigen
@@ -146,7 +155,4 @@ async function deleteTask(taskId) {
 }
 
 // Event-Listener
-document.getElementById('taskForm').addEventListener('submit', async (event) => {
-    event.preventDefault(); // Verhindert das Neuladen der Seite
-    await addTask();
-});
+document.getElementById('taskForm').addEventListener('submit', async (ev
