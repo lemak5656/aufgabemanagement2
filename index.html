@@ -38,16 +38,6 @@
             display: block;
         }
 
-        .logo {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .logo img {
-            width: 200px;
-        }
-
         form {
             max-width: 400px;
             margin: 20px auto;
@@ -78,13 +68,19 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
+        li img {
+            max-width: 200px;
+            display: block;
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="logo">
-        <img src="Download.png" alt="Upland Parcs Logo">
-    </div>
-
     <nav>
         <a href="#" onclick="showSection('eintrag')">Eintrag</a>
         <a href="#" onclick="showSection('meldungen')">Meldung Gekommen</a>
@@ -107,6 +103,9 @@
                 <option value="Mittel">Mittel</option>
                 <option value="Hoch">Hoch</option>
             </select>
+
+            <label for="foto">Foto hochladen:</label>
+            <input type="file" id="foto" name="foto" accept="image/*">
 
             <button type="submit">Hinzufügen</button>
         </form>
