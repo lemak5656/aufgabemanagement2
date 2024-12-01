@@ -30,11 +30,14 @@ async function addTask() {
     const haus = document.getElementById('haus').value;
     const problem = document.getElementById('problem').value;
     const priorität = document.getElementById('priorität').value;
+    const fotoInput = document.getElementById('foto');
+    const foto = fotoInput.files[0] ? URL.createObjectURL(fotoInput.files[0]) : null;
 
     const task = {
         haus,
         problem,
         priorität,
+        foto,
         status: 'meldungen',
         abteilung: 'Keine',
         timestamp: new Date()
@@ -70,6 +73,7 @@ function renderTask(task, listId) {
         <strong>Problem:</strong> ${task.problem}<br>
         <strong>Priorität:</strong> ${task.priorität}<br>
         <strong>Abteilung:</strong> ${task.abteilung}<br>
+        ${task.foto ? `<img src="${task.foto}" alt="Foto" style="max-width: 200px;">` : ''}
     `;
 
     const actions = document.createElement('div');
@@ -107,7 +111,14 @@ function renderTask(task, listId) {
             listItem.remove();
         });
 
+        const druckenButton = document.createElement('button');
+        druckenButton.textContent = 'Drucken';
+        druckenButton.addEventListener('click', () => {
+            druckenTask(task);
+        });
+
         actions.appendChild(erledigtButton);
+        actions.appendChild(druckenButton);
     }
 
     // Buttons für Archiv
@@ -145,6 +156,28 @@ async function deleteTask(taskId) {
     const taskRef = doc(db, "tasks", taskId);
     await deleteDoc(taskRef);
     console.log(`Aufgabe ${taskId} gelöscht.`);
+}
+
+// Aufgabe drucken
+function druckenTask(task) {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Aufgabe Drucken</title>
+            </head>
+            <body>
+                <h2>Aufgabendetails</h2>
+                <p><strong>Haus:</strong> ${task.haus}</p>
+                <p><strong>Problem:</strong> ${task.problem}</p>
+                <p><strong>Priorität:</strong> ${task.priorität}</p>
+                <p><strong>Abteilung:</strong> ${task.abteilung}</p>
+                ${task.foto ? `<img src="${task.foto}" alt="Foto" style="max-width: 300px;">` : ''}
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
 }
 
 // Event Listener
