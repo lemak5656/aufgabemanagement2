@@ -8,6 +8,48 @@ function showSection(sectionId) {
 
 window.showSection = showSection; // Funktion global verfügbar machen
 
+// Aufgaben hinzufügen
+document.getElementById('taskForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const haus = document.getElementById('haus').value;
+    const problem = document.getElementById('problem').value;
+    const priorität = document.getElementById('priorität').value;
+    const fotoInput = document.getElementById('foto');
+
+    let fotoDataURL = null;
+
+    if (fotoInput.files.length > 0) {
+        const file = fotoInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            fotoDataURL = e.target.result;
+            addTaskToList('meldungenList', haus, problem, priorität, fotoDataURL);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        addTaskToList('meldungenList', haus, problem, priorität, null);
+    }
+
+    document.getElementById('taskForm').reset();
+});
+
+// Aufgaben hinzufügen zur Liste
+function addTaskToList(listId, haus, problem, priorität, fotoDataURL) {
+    const list = document.getElementById(listId);
+    const listItem = document.createElement('li');
+
+    listItem.innerHTML = `
+        <input type="checkbox" class="task-checkbox">
+        <strong>Haus:</strong> ${haus}<br>
+        <strong>Problem:</strong> ${problem}<br>
+        <strong>Priorität:</strong> ${priorität}<br>
+        ${fotoDataURL ? `<img src="${fotoDataURL}" alt="Foto">` : ''}
+    `;
+
+    list.appendChild(listItem);
+}
+
 // Aufgaben filtern
 function filterTasks(listId, filterInputId) {
     const filter = document.getElementById(filterInputId).value.toLowerCase();
@@ -23,8 +65,12 @@ document.getElementById('aufgabenFilter').addEventListener('input', () => filter
 
 // Druckfunktion
 function printSelectedTasks(listId) {
-    const tasks = document.querySelectorAll(`#${listId} li`);
-    const selectedTasks = Array.from(tasks).map(task => task.textContent.trim()).join('\n\n');
+    const tasks = document.querySelectorAll(`#${listId} li .task-checkbox:checked`);
+    const selectedTasks = Array.from(tasks).map(task => {
+        const parent = task.parentElement;
+        return parent.textContent.trim();
+    }).join('\n\n');
+
     const newWindow = window.open('', '', 'width=600,height=400');
     newWindow.document.write('<pre>' + selectedTasks + '</pre>');
     newWindow.print();
