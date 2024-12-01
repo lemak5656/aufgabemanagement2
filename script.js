@@ -16,22 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOMContentLoaded - Initialisiert die Seite
-document.addEventListener('DOMContentLoaded', () => {
-    showSection('eintrag'); // Zeigt die erste Sektion an
-
-    // Event-Listener für das Formular
-    const taskForm = document.getElementById('taskForm');
-    taskForm.addEventListener('submit', async function (event) {
-        event.preventDefault(); // Verhindert das Standard-Verhalten des Formulars
-        await addTask(); // Fügt die Aufgabe hinzu
-        showSection('meldungen'); // Navigiert zur "Meldung Gekommen"-Sektion
-    });
-
-    loadTasks(); // Lädt vorhandene Aufgaben
-});
-
-// Funktion zur Navigation zwischen den Sektionen
+// Funktion zur Navigation
 function showSection(sectionId) {
     const sections = document.querySelectorAll('section');
     sections.forEach(section => {
@@ -40,7 +25,21 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
-// Aufgabe hinzufügen und in Firestore speichern
+// DOMContentLoaded - Initialisiert die Seite
+document.addEventListener('DOMContentLoaded', () => {
+    showSection('eintrag'); // Standardmäßig die 'eintrag'-Sektion anzeigen
+
+    const taskForm = document.getElementById('taskForm');
+    taskForm.addEventListener('submit', async function (event) {
+        event.preventDefault(); // Verhindert das Standardverhalten des Formulars
+        await addTask(); // Fügt die Aufgabe hinzu
+        showSection('meldungen'); // Navigiert zur "Meldung Gekommen"-Sektion
+    });
+
+    loadTasks(); // Lädt vorhandene Aufgaben
+});
+
+// Aufgabe hinzufügen
 async function addTask() {
     const haus = document.getElementById('haus').value;
     const problem = document.getElementById('problem').value;
@@ -67,7 +66,7 @@ async function addTask() {
     }
 }
 
-// Aufgaben rendern und in der entsprechenden Liste anzeigen
+// Aufgaben anzeigen
 function renderTask(task, listId) {
     const list = document.getElementById(listId);
     const listItem = document.createElement('li');
@@ -108,7 +107,7 @@ function renderTask(task, listId) {
     list.appendChild(listItem);
 }
 
-// Aufgaben aus Firestore laden und rendern
+// Aufgaben laden
 async function loadTasks() {
     const querySnapshot = await getDocs(collection(db, "tasks"));
     querySnapshot.forEach((doc) => {
