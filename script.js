@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API Key
-const imgbbApiKey = "VOTRE_CLE_API_ICI"; // Remplacez par votre clé API ImgBB
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Remplacez par votre clé API ImgBB
 
 // Navigation entre les sections
 function showSection(sectionId) {
