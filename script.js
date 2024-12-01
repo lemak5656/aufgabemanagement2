@@ -155,4 +155,7 @@ async function deleteTask(taskId) {
 }
 
 // Event-Listener
-document.getElementById('taskForm').addEventListener('submit', async (ev
+document.getElementById('taskForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Verhindert das Neuladen der Seite
+    await addTask();
+});
