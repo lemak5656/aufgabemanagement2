@@ -55,6 +55,16 @@
             background-color: #fff;
         }
 
+        li.erledigt {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        li.nichterledigt {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
         li img {
             max-width: 200px;
             display: block;
@@ -74,7 +84,7 @@
             background-color: #0056b3;
         }
 
-        form {
+        form, .filter-form {
             max-width: 400px;
             margin: 20px auto;
             background: #fff;
@@ -83,7 +93,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        form input, form select, form button {
+        form input, form select, form button, .filter-form input, .filter-form button {
             width: 100%;
             margin: 10px 0;
             padding: 10px;
@@ -97,6 +107,12 @@
         <button onclick="showSection('archiv')">Archiv</button>
         <button onclick="showSection('add-task')">Neue Aufgabe</button>
     </nav>
+
+    <!-- Filter -->
+    <form class="filter-form">
+        <input type="text" id="filter-input" placeholder="Filter eingeben (Haus, Priorität)">
+        <button type="button" onclick="applyFilter()">Filter anwenden</button>
+    </form>
 
     <section id="meldungen" class="active">
         <h2>Meldung Gekommen</h2>
