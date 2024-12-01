@@ -142,17 +142,30 @@
             <!-- Dynamischer Inhalt -->
         </tbody>
     </table>
-    <button onclick="printSelected()">Ausgewählte Aufgaben drucken</button>
 </section>
 
 <section id="archiv">
     <h2>Archivierte Aufgaben</h2>
-    <p>Keine archivierten Aufgaben.</p>
+    <table id="archive-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Priorität</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
 </section>
 
 <script>
     let meldungen = [];
     let offeneAufgaben = [];
+    let archiv = [];
 
     function showPage(pageId) {
         document.querySelectorAll('section').forEach(section => {
@@ -232,25 +245,27 @@
                 <td>${task.haus}</td>
                 <td>${task.problem}</td>
                 <td>In Arbeit</td>
-                <td><button onclick="archiveTask('${task.id}')">Archivieren</button></td>
+                <td>
+                    <button onclick="markAsDone('${task.id}')">Erledigt</button>
+                    <button onclick="archiveTask('${task.id}')">Archivieren</button>
+                </td>
             `;
             tbody.appendChild(row);
         });
     }
 
+    function markAsDone(id) {
+        const task = offeneAufgaben.find(t => t.id === id);
+        if (task) {
+            task.status = 'Erledigt';
+            updateOffeneAufgaben();
+        }
+    }
+
     function archiveTask(id) {
-        offeneAufgaben = offeneAufgaben.filter(task => task.id !== id);
-        updateOffeneAufgaben();
-    }
-
-    function printSelected() {
-        const printContent = document.getElementById('task-table').outerHTML;
-        const printWindow = window.open('', '', 'width=800,height=600');
-        printWindow.document.write(`<html><head><title>Ausgewählte Aufgaben</title></head><body>${printContent}</body></html>`);
-        printWindow.document.close();
-        printWindow.print();
-    }
-</script>
-
-</body>
-</html>
+        const taskIndex = offeneAufgaben.findIndex(t => t.id === id);
+        if (taskIndex !== -1) {
+            archiv.push(offeneAufgaben[taskIndex]);
+            offeneAufgaben.splice(taskIndex, 1);
+            updateOffeneAufgaben();
+            updateArchiv();
