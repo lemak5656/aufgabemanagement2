@@ -1,4 +1,4 @@
-// Funktion zur Navigation
+// Navigation zwischen den Abschnitten
 function showSection(sectionId) {
     document.querySelectorAll('section').forEach(section => {
         section.classList.remove('active');
@@ -6,7 +6,7 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
-window.showSection = showSection; // Funktion global verfügbar machen
+window.showSection = showSection;
 
 // Aufgaben hinzufügen
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
@@ -34,7 +34,7 @@ document.getElementById('taskForm').addEventListener('submit', async (event) => 
     document.getElementById('taskForm').reset();
 });
 
-// Aufgaben hinzufügen zur Liste
+// Aufgabe zur Liste hinzufügen
 function addTaskToList(listId, haus, problem, priorität, fotoDataURL) {
     const list = document.getElementById(listId);
     const listItem = document.createElement('li');
@@ -45,9 +45,26 @@ function addTaskToList(listId, haus, problem, priorität, fotoDataURL) {
         <strong>Problem:</strong> ${problem}<br>
         <strong>Priorität:</strong> ${priorität}<br>
         ${fotoDataURL ? `<img src="${fotoDataURL}" alt="Foto">` : ''}
+        <div>
+            <label for="abteilung">Abteilung:</label>
+            <select class="abteilung">
+                <option value="Keine">Keine</option>
+                <option value="Hausverwaltung">Hausverwaltung</option>
+                <option value="Hausmeister">Hausmeister</option>
+                <option value="Rezeption">Rezeption</option>
+            </select>
+            <button onclick="moveTaskTo('aufgabenList', this)">In Arbeit setzen</button>
+        </div>
     `;
 
     list.appendChild(listItem);
+}
+
+// Aufgabe in eine andere Liste verschieben
+function moveTaskTo(targetListId, button) {
+    const listItem = button.parentElement.parentElement;
+    const targetList = document.getElementById(targetListId);
+    targetList.appendChild(listItem);
 }
 
 // Aufgaben filtern
@@ -63,7 +80,7 @@ function filterTasks(listId, filterInputId) {
 document.getElementById('meldungenFilter').addEventListener('input', () => filterTasks('meldungenList', 'meldungenFilter'));
 document.getElementById('aufgabenFilter').addEventListener('input', () => filterTasks('aufgabenList', 'aufgabenFilter'));
 
-// Druckfunktion
+// Aufgaben drucken
 function printSelectedTasks(listId) {
     const tasks = document.querySelectorAll(`#${listId} li .task-checkbox:checked`);
     const selectedTasks = Array.from(tasks).map(task => {
@@ -77,4 +94,4 @@ function printSelectedTasks(listId) {
     newWindow.close();
 }
 
-window.printSelectedTasks = printSelectedTasks; // Funktion global verfügbar machen
+window.printSelectedTasks = printSelectedTasks;
