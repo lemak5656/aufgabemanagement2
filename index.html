@@ -101,72 +101,26 @@
             <option value="Mittel">Mittel</option>
             <option value="Hoch">Hoch</option>
         </select>
-        <label for="photo">Foto hochladen</label>
-        <input type="file" id="photo" accept="image/*">
         <button type="submit">Hinzufügen</button>
     </form>
 </section>
 
 <section id="meldungen">
     <h2>Meldung Gekommen</h2>
-    <table id="meldung-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Foto</th>
-                <th>Abteilung</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
+    <p>Keine Meldungen vorhanden.</p>
 </section>
 
 <section id="aufgaben">
     <h2>Offene Aufgaben</h2>
-    <table id="task-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Status</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
+    <p>Keine offenen Aufgaben.</p>
 </section>
 
 <section id="archiv">
     <h2>Archivierte Aufgaben</h2>
-    <table id="archive-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Priorität</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
+    <p>Keine archivierten Aufgaben.</p>
 </section>
 
 <script>
-    let meldungen = [];
-    let offeneAufgaben = [];
-    let archiv = [];
-
     function showPage(pageId) {
         document.querySelectorAll('section').forEach(section => {
             section.classList.remove('active');
@@ -179,93 +133,15 @@
         const haus = document.getElementById('haus').value;
         const problem = document.getElementById('problem').value;
         const priorität = document.getElementById('priorität').value;
-        const photo = document.getElementById('photo').files[0];
-        const id = Math.random().toString(36).substr(2, 9);
 
-        const newMeldung = {
-            id,
-            haus,
-            problem,
-            priorität,
-            photo: photo ? URL.createObjectURL(photo) : null
-        };
-        meldungen.push(newMeldung);
-        updateMeldungen();
+        alert(`Neue Aufgabe hinzugefügt:\nHaus: ${haus}\nProblem: ${problem}\nPriorität: ${priorität}`);
         e.target.reset();
     });
 
-    function updateMeldungen() {
-        const tbody = document.getElementById('meldung-table').querySelector('tbody');
-        tbody.innerHTML = '';
-        meldungen.forEach(meldung => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${meldung.id}</td>
-                <td>${meldung.haus}</td>
-                <td>${meldung.problem}</td>
-                <td>${meldung.photo ? `<img src="${meldung.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
-                <td>
-                    <select onchange="assignAbteilung('${meldung.id}', this.value)">
-                        <option value="">Keine</option>
-                        <option value="Technik">Technik</option>
-                        <option value="Hauswirtschaft">Hauswirtschaft</option>
-                        <option value="Bau">Bau</option>
-                    </select>
-                </td>
-                <td>
-                    <button onclick="setToWork('${meldung.id}')">In Arbeit setzen</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        showPage('eintrag'); // Charger la page par défaut
+    });
+</script>
 
-    function assignAbteilung(id, abteilung) {
-        const meldung = meldungen.find(m => m.id === id);
-        if (meldung) meldung.abteilung = abteilung;
-    }
-
-    function setToWork(id) {
-        const meldungIndex = meldungen.findIndex(m => m.id === id);
-        if (meldungIndex !== -1) {
-            offeneAufgaben.push(meldungen[meldungIndex]);
-            meldungen.splice(meldungIndex, 1);
-            updateMeldungen();
-            updateOffeneAufgaben();
-        }
-    }
-
-    function updateOffeneAufgaben() {
-        const tbody = document.getElementById('task-table').querySelector('tbody');
-        tbody.innerHTML = '';
-        offeneAufgaben.forEach(task => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${task.id}</td>
-                <td>${task.haus}</td>
-                <td>${task.problem}</td>
-                <td>In Arbeit</td>
-                <td>
-                    <button onclick="markAsDone('${task.id}')">Erledigt</button>
-                    <button onclick="archiveTask('${task.id}')">Archivieren</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    function markAsDone(id) {
-        const task = offeneAufgaben.find(t => t.id === id);
-        if (task) {
-            task.status = 'Erledigt';
-            updateOffeneAufgaben();
-        }
-    }
-
-    function archiveTask(id) {
-        const taskIndex = offeneAufgaben.findIndex(t => t.id === id);
-        if (taskIndex !== -1) {
-            archiv.push(offeneAufgaben[taskIndex]);
-            offeneAufgaben.splice(taskIndex, 1);
-            updateOffeneAufgaben();
-            updateArchiv();
+</body>
+</html>
