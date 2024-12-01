@@ -78,6 +78,18 @@
         button {
             margin-top: 5px;
         }
+
+        .filter {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 10px;
+            background: #f4f4f4;
+            border-radius: 5px;
+        }
+
+        .filter label {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -118,6 +130,15 @@
 
     <section id="aufgaben">
         <h2>Offene Aufgaben</h2>
+        <div class="filter">
+            <label for="filter">Nach Abteilung filtern:</label>
+            <select id="filter" onchange="filterTasks()">
+                <option value="Alle">Alle</option>
+                <option value="Hausverwaltung">Hausverwaltung</option>
+                <option value="Hausmeister">Hausmeister</option>
+                <option value="Rezeption">Rezeption</option>
+            </select>
+        </div>
         <ul id="aufgabenList"></ul>
     </section>
 
