@@ -6,5 +6,5 @@ function showPage(pageId) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    showPage('eintrag'); // Page par défaut au chargement
+    showPage('eintrag'); // Standardmäßig die "eintrag"-Seite anzeigen
 });
