@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Ersetze durch deinen Schlüssel
+const imgbbApiKey = 089c18aad823c1319810440f66ee7053; // Ersetze durch deinen Schlüssel
 
 // Passwortschutz
 const PASSWORD = "uplandparcs"; // Passwort
@@ -73,7 +73,7 @@ async function uploadToImgBB(file) {
     const formData = new FormData();
     formData.append("image", file);
     try {
-        const response = await fetch(`https://api.imgbb.com/1/upload?key=${089c18aad823c1319810440f66ee7053}`, {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
             method: "POST",
             body: formData
         });
