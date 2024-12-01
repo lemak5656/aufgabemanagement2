@@ -1,6 +1,6 @@
 // Firebase-Konfiguration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -48,7 +48,7 @@ async function addTask() {
         problem,
         priorität,
         foto: fotoURL,
-        status: 'aufgaben', // Standardmäßig "Offene Aufgaben"
+        status: 'aufgaben',
         abteilung: 'Keine',
         kommentare: [],
         timestamp: new Date(),
@@ -58,6 +58,7 @@ async function addTask() {
         await addDoc(collection(db, "tasks"), task);
         console.log("Aufgabe erfolgreich hinzugefügt.");
         document.getElementById('taskForm').reset();
+        showSection('aufgaben');
     } catch (error) {
         console.error("Fehler beim Hinzufügen der Aufgabe:", error);
     }
@@ -99,12 +100,6 @@ function renderTask(task, listId) {
             await updateTask(task.id, { kommentare });
         });
 
-        const erledigtButton = document.createElement('button');
-        erledigtButton.textContent = 'Erledigt';
-        erledigtButton.addEventListener('click', () => {
-            alert("Diese Aufgabe bleibt in der Liste, bis sie manuell archiviert wird.");
-        });
-
         const archivierenButton = document.createElement('button');
         archivierenButton.textContent = 'Archivieren';
         archivierenButton.addEventListener('click', async () => {
@@ -113,7 +108,6 @@ function renderTask(task, listId) {
         });
 
         actions.appendChild(kommentarInput);
-        actions.appendChild(erledigtButton);
         actions.appendChild(archivierenButton);
     } else if (listId === 'archivList') {
         const löschenButton = document.createElement('button');
@@ -151,15 +145,8 @@ async function deleteTask(taskId) {
     console.log(`Aufgabe ${taskId} wurde gelöscht.`);
 }
 
-// Aufgaben filtern
-function filterTasks() {
-    const filter = document.getElementById("filter").value.toLowerCase();
-    const tasks = document.querySelectorAll("#aufgabenList li");
-    tasks.forEach(task => {
-        const haus = task.querySelector("strong:nth-child(1)").innerText.toLowerCase();
-        task.style.display = haus.includes(filter) || filter === "alle" ? "block" : "none";
-    });
-}
-
 // Event-Listener
-document.getElement
+document.getElementById('taskForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Verhindert das Neuladen der Seite
+    await addTask();
+});
