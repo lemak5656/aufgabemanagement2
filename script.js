@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = "089c18aad823c1319810440f66ee7053";
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Dein API-Schlüssel
 
 // Passwortschutz
 const PASSWORD = "uplandparcs";
@@ -126,6 +126,9 @@ function renderTask(task) {
         <button onclick="updateTaskStatus('${task.id}', '${task.status === 'meldungen' ? 'aufgaben' : 'archiv'}')">
             ${task.status === 'meldungen' ? 'In Arbeit setzen' : 'Archivieren'}
         </button>
+        <button onclick="markAsDone('${task.id}', ${!task.erledigt})">
+            ${task.erledigt ? 'Nicht Erledigt' : 'Erledigt'}
+        </button>
     `;
     list.appendChild(listItem);
 }
@@ -139,4 +142,15 @@ async function updateTaskStatus(taskId, newStatus) {
         console.error("Fehler beim Aktualisieren des Status:", error);
     }
 }
-window.updateTaskStatus
+window.updateTaskStatus = updateTaskStatus; // Funktion global verfügbar machen
+
+// Aufgabe als erledigt markieren
+async function markAsDone(taskId, erledigtStatus) {
+    try {
+        await updateDoc(doc(db, "tasks", taskId), { erledigt: erledigtStatus });
+        console.log(`Aufgabe ${taskId} als ${erledigtStatus ? "erledigt" : "nicht erledigt"} markiert.`);
+    } catch (error) {
+        console.error("Fehler beim Markieren als Erledigt:", error);
+    }
+}
+window.markAsDone = markAsDone; // Funktion global verfügbar machen
