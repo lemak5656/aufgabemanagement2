@@ -1,6 +1,6 @@
 // Firebase-Konfiguration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, updateDoc, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 
 // Firebase initialisieren
 const firebaseConfig = {
@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = "DEIN_API_SCHLÜSSEL_HIER"; // Ersetze durch deinen Schlüssel
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Ersetze durch deinen Schlüssel
 
 // Passwortschutz
 const PASSWORD = "uplandparcs"; // Passwort
@@ -106,7 +106,6 @@ function renderTask(task) {
     if (!list) return;
 
     const listItem = document.createElement('li');
-    listItem.className = task.erledigt ? 'erledigt' : 'nichterledigt';
     listItem.innerHTML = `
         <strong>Haus:</strong> ${task.haus}<br>
         <strong>Problem:</strong> ${task.problem}<br>
@@ -114,9 +113,6 @@ function renderTask(task) {
         ${task.foto ? `<img src="${task.foto}" alt="Foto" style="max-width: 200px;">` : ''}
         <button onclick="updateTaskStatus('${task.id}', '${task.status === 'meldungen' ? 'aufgaben' : 'archiv'}')">
             ${task.status === 'meldungen' ? 'In Arbeit setzen' : 'Archivieren'}
-        </button>
-        <button onclick="markAsDone('${task.id}', ${!task.erledigt})">
-            ${task.erledigt ? 'Nicht Erledigt' : 'Erledigt'}
         </button>
     `;
     list.appendChild(listItem);
@@ -128,18 +124,4 @@ async function updateTaskStatus(taskId, newStatus) {
         await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
         console.log(`Aufgabe ${taskId} verschoben nach ${newStatus}.`);
     } catch (error) {
-        console.error("Fehler beim Aktualisieren des Status:", error);
-    }
-}
-window.updateTaskStatus = updateTaskStatus; // Funktion global verfügbar machen
-
-// Aufgabe als erledigt markieren
-async function markAsDone(taskId, erledigtStatus) {
-    try {
-        await updateDoc(doc(db, "tasks", taskId), { erledigt: erledigtStatus });
-        console.log(`Aufgabe ${taskId} als ${erledigtStatus ? "erledigt" : "nicht erledigt"} markiert.`);
-    } catch (error) {
-        console.error("Fehler beim Markieren als Erledigt:", error);
-    }
-}
-window.markAsDone = markAsDone; // Funktion global verfügbar machen
+        console.error("Fehler beim Aktualisieren
