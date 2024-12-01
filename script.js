@@ -48,8 +48,9 @@ async function addTask() {
         problem,
         priorität,
         foto: fotoURL,
-        status: 'meldungen',
+        status: 'aufgaben', // Standardmäßig "Offene Aufgaben"
         abteilung: 'Keine',
+        kommentare: [],
         timestamp: new Date(),
     };
 
@@ -88,50 +89,32 @@ function renderTask(task, listId) {
 
     const actions = document.createElement('div');
 
-    if (listId === 'meldungenList') {
-        const abteilungSelect = document.createElement('select');
-        abteilungSelect.innerHTML = `
-            <option value="Keine" ${task.abteilung === "Keine" ? "selected" : ""}>Keine</option>
-            <option value="Hausverwaltung" ${task.abteilung === "Hausverwaltung" ? "selected" : ""}>Hausverwaltung</option>
-            <option value="Hausmeister" ${task.abteilung === "Hausmeister" ? "selected" : ""}>Hausmeister</option>
-            <option value="Rezeption" ${task.abteilung === "Rezeption" ? "selected" : ""}>Rezeption</option>
-        `;
-
-        abteilungSelect.addEventListener('change', async () => {
-            const neueAbteilung = abteilungSelect.value;
-            await updateTask(task.id, { abteilung: neueAbteilung });
+    if (listId === 'aufgabenList') {
+        const kommentarInput = document.createElement('textarea');
+        kommentarInput.placeholder = "Kommentar hinzufügen";
+        kommentarInput.value = task.kommentare.join("\n"); // Kommentare anzeigen
+        kommentarInput.addEventListener('change', async () => {
+            const kommentar = kommentarInput.value.trim();
+            const kommentare = kommentar.split("\n").filter(k => k.trim() !== "");
+            await updateTask(task.id, { kommentare });
         });
 
-        const inArbeitButton = document.createElement('button');
-        inArbeitButton.textContent = 'In Arbeit setzen';
-        inArbeitButton.addEventListener('click', async () => {
-            await updateTaskStatus(task.id, 'aufgaben');
-            listItem.remove();
-        });
-
-        actions.appendChild(abteilungSelect);
-        actions.appendChild(inArbeitButton);
-    } else if (listId === 'aufgabenList') {
         const erledigtButton = document.createElement('button');
         erledigtButton.textContent = 'Erledigt';
-        erledigtButton.addEventListener('click', async () => {
+        erledigtButton.addEventListener('click', () => {
+            alert("Diese Aufgabe bleibt in der Liste, bis sie manuell archiviert wird.");
+        });
+
+        const archivierenButton = document.createElement('button');
+        archivierenButton.textContent = 'Archivieren';
+        archivierenButton.addEventListener('click', async () => {
             await updateTaskStatus(task.id, 'archiv');
             listItem.remove();
         });
 
-        const kommentarInput = document.createElement('textarea');
-        kommentarInput.placeholder = "Kommentar hinzufügen";
-        kommentarInput.addEventListener('change', async () => {
-            const kommentar = kommentarInput.value.trim();
-            if (kommentar) {
-                await updateTask(task.id, { kommentar });
-                alert("Kommentar hinzugefügt!");
-                kommentarInput.value = "";
-            }
-        });
-
-        actions.appendChild(erledigtButton);
         actions.appendChild(kommentarInput);
+        actions.appendChild(erledigtButton);
+        actions.appendChild(archivierenButton);
     } else if (listId === 'archivList') {
         const löschenButton = document.createElement('button');
         löschenButton.textContent = 'Löschen';
@@ -154,7 +137,7 @@ async function updateTaskStatus(taskId, newStatus) {
     console.log(`Status der Aufgabe ${taskId} wurde auf ${newStatus} aktualisiert.`);
 }
 
-// Aufgabenattribute aktualisieren (z. B. Abteilung oder Kommentar)
+// Aufgabenattribute aktualisieren (z. B. Kommentare hinzufügen)
 async function updateTask(taskId, updates) {
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, updates);
@@ -168,9 +151,15 @@ async function deleteTask(taskId) {
     console.log(`Aufgabe ${taskId} wurde gelöscht.`);
 }
 
+// Aufgaben filtern
+function filterTasks() {
+    const filter = document.getElementById("filter").value.toLowerCase();
+    const tasks = document.querySelectorAll("#aufgabenList li");
+    tasks.forEach(task => {
+        const haus = task.querySelector("strong:nth-child(1)").innerText.toLowerCase();
+        task.style.display = haus.includes(filter) || filter === "alle" ? "block" : "none";
+    });
+}
+
 // Event-Listener
-document.getElementById('taskForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    await addTask();
-    showSection('meldungen');
-});
+document.getElement
