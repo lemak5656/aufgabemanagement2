@@ -101,26 +101,71 @@
             <option value="Mittel">Mittel</option>
             <option value="Hoch">Hoch</option>
         </select>
+        <label for="photo">Foto hochladen</label>
+        <input type="file" id="photo" accept="image/*">
         <button type="submit">Hinzufügen</button>
     </form>
 </section>
 
 <section id="meldungen">
     <h2>Meldung Gekommen</h2>
-    <p>Keine Meldungen vorhanden.</p>
+    <table id="meldung-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Foto</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
 </section>
 
 <section id="aufgaben">
     <h2>Offene Aufgaben</h2>
-    <p>Keine offenen Aufgaben.</p>
+    <table id="task-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Foto</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
 </section>
 
 <section id="archiv">
     <h2>Archivierte Aufgaben</h2>
-    <p>Keine archivierten Aufgaben.</p>
+    <table id="archive-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Haus</th>
+                <th>Problem</th>
+                <th>Foto</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamischer Inhalt -->
+        </tbody>
+    </table>
 </section>
 
 <script>
+    let meldungen = [];
+    let offeneAufgaben = [];
+    let archiv = [];
+
     function showPage(pageId) {
         document.querySelectorAll('section').forEach(section => {
             section.classList.remove('active');
@@ -133,15 +178,85 @@
         const haus = document.getElementById('haus').value;
         const problem = document.getElementById('problem').value;
         const priorität = document.getElementById('priorität').value;
+        const photoFile = document.getElementById('photo').files[0];
+        const photo = photoFile ? URL.createObjectURL(photoFile) : null;
+        const id = Math.random().toString(36).substr(2, 9);
 
-        alert(`Neue Aufgabe hinzugefügt:\nHaus: ${haus}\nProblem: ${problem}\nPriorität: ${priorität}`);
+        const newMeldung = { id, haus, problem, priorität, photo };
+        meldungen.push(newMeldung);
+        updateMeldungen();
         e.target.reset();
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-        showPage('eintrag'); // Charger la page par défaut
-    });
-</script>
+    function updateMeldungen() {
+        const tbody = document.getElementById('meldung-table').querySelector('tbody');
+        tbody.innerHTML = '';
+        meldungen.forEach(meldung => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${meldung.id}</td>
+                <td>${meldung.haus}</td>
+                <td>${meldung.problem}</td>
+                <td>${meldung.photo ? `<img src="${meldung.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
+                <td>
+                    <button onclick="moveToOffeneAufgaben('${meldung.id}')">In Arbeit setzen</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
 
-</body>
-</html>
+    function moveToOffeneAufgaben(id) {
+        const index = meldungen.findIndex(m => m.id === id);
+        if (index !== -1) {
+            offeneAufgaben.push(meldungen[index]);
+            meldungen.splice(index, 1);
+            updateMeldungen();
+            updateOffeneAufgaben();
+        }
+    }
+
+    function updateOffeneAufgaben() {
+        const tbody = document.getElementById('task-table').querySelector('tbody');
+        tbody.innerHTML = '';
+        offeneAufgaben.forEach(task => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${task.id}</td>
+                <td>${task.haus}</td>
+                <td>${task.problem}</td>
+                <td>${task.photo ? `<img src="${task.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
+                <td>
+                    <button onclick="archiveTask('${task.id}')">Archivieren</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function archiveTask(id) {
+        const index = offeneAufgaben.findIndex(t => t.id === id);
+        if (index !== -1) {
+            archiv.push(offeneAufgaben[index]);
+            offeneAufgaben.splice(index, 1);
+            updateOffeneAufgaben();
+            updateArchiv();
+        }
+    }
+
+    function updateArchiv() {
+        const tbody = document.getElementById('archive-table').querySelector('tbody');
+        tbody.innerHTML = '';
+        archiv.forEach(task => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${task.id}</td>
+                <td>${task.haus}</td>
+                <td>${task.problem}</td>
+                <td>${task.photo ? `<img src="${task.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
+                <td>
+                    <button onclick="deleteArchived('${task.id}')">Löschen</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
