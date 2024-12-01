@@ -242,21 +242,4 @@
             updateOffeneAufgaben();
             updateArchiv();
         }
-    }
-
-    function updateArchiv() {
-        const tbody = document.getElementById('archive-table').querySelector('tbody');
-        tbody.innerHTML = '';
-        archiv.forEach(task => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${task.id}</td>
-                <td>${task.haus}</td>
-                <td>${task.problem}</td>
-                <td>${task.photo ? `<img src="${task.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
-                <td>
-                    <button onclick="deleteArchived('${task.id}')">Löschen</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
+   
