@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 
-// Firebase-Konfigurationsdaten
+// Firebase initialisieren
 const firebaseConfig = {
     apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
     authDomain: "aufgabemanagement.firebaseapp.com",
@@ -13,15 +13,14 @@ const firebaseConfig = {
     measurementId: "G-NSPT7LPEQ0"
 };
 
-// Firebase initialisieren
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Ersetze dies mit deinem ImgBB API-Schlüssel
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Ersetze durch deinen Schlüssel
 
 // Passwortschutz
-const PASSWORD = "uplandparcs"; // Das Passwort
+const PASSWORD = "uplandparcs"; // Passwort
 document.getElementById('login-button').addEventListener('click', () => {
     const enteredPassword = document.getElementById('password-input').value;
     if (enteredPassword === PASSWORD) {
@@ -128,17 +127,4 @@ async function updateTaskStatus(taskId, newStatus) {
     try {
         await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
         console.log(`Aufgabe ${taskId} verschoben nach ${newStatus}.`);
-    } catch (error) {
-        console.error("Fehler beim Aktualisieren des Status:", error);
-    }
-}
-
-// Aufgabe als erledigt markieren
-async function markAsDone(taskId, erledigtStatus) {
-    try {
-        await updateDoc(doc(db, "tasks", taskId), { erledigt: erledigtStatus });
-        console.log(`Aufgabe ${taskId} als ${erledigtStatus ? "erledigt" : "nicht erledigt"} markiert.`);
-    } catch (error) {
-        console.error("Fehler beim Markieren als Erledigt:", error);
-    }
-}
+    } catch (error)
