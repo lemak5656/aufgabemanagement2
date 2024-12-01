@@ -24,7 +24,7 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
-window.showSection = showSection; // Funktion global verfügbar machen
+window.showSection = showSection;
 
 // Aufgabe hinzufügen
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
@@ -120,7 +120,7 @@ function renderTask(task, listId) {
         const erledigtButton = document.createElement('button');
         erledigtButton.textContent = "Erledigt";
         erledigtButton.addEventListener("click", async () => {
-            await updateTaskStatus(task.id, "erledigt");
+            console.log("Aufgabe erledigt!");
         });
 
         const archivierenButton = document.createElement('button');
