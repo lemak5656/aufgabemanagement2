@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 
+// Firebase initialisieren
 const firebaseConfig = {
     apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
     authDomain: "aufgabemanagement.firebaseapp.com",
@@ -12,22 +13,25 @@ const firebaseConfig = {
     measurementId: "G-NSPT7LPEQ0"
 };
 
-// Firebase initialisieren
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// DOMContentLoaded - Initialisiert die Seite
 document.addEventListener('DOMContentLoaded', () => {
-    showSection('eintrag');
+    showSection('eintrag'); // Zeigt die erste Sektion an
 
+    // Event-Listener für das Formular
     const taskForm = document.getElementById('taskForm');
     taskForm.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        await addTask();
+        event.preventDefault(); // Verhindert das Standard-Verhalten des Formulars
+        await addTask(); // Fügt die Aufgabe hinzu
+        showSection('meldungen'); // Navigiert zur "Meldung Gekommen"-Sektion
     });
 
-    loadTasks();
+    loadTasks(); // Lädt vorhandene Aufgaben
 });
 
+// Funktion zur Navigation zwischen den Sektionen
 function showSection(sectionId) {
     const sections = document.querySelectorAll('section');
     sections.forEach(section => {
@@ -36,6 +40,7 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
+// Aufgabe hinzufügen und in Firestore speichern
 async function addTask() {
     const haus = document.getElementById('haus').value;
     const problem = document.getElementById('problem').value;
@@ -55,13 +60,14 @@ async function addTask() {
     try {
         const docRef = await addDoc(collection(db, "tasks"), task);
         console.log("Aufgabe hinzugefügt mit ID: ", docRef.id);
-        renderTask({ id: docRef.id, ...task }, 'meldungenList');
-        document.getElementById('taskForm').reset();
+        renderTask({ id: docRef.id, ...task }, 'meldungenList'); // Zeigt die Aufgabe in der "Meldung Gekommen"-Liste an
+        document.getElementById('taskForm').reset(); // Formular zurücksetzen
     } catch (error) {
         console.error("Fehler beim Hinzufügen der Aufgabe: ", error);
     }
 }
 
+// Aufgaben rendern und in der entsprechenden Liste anzeigen
 function renderTask(task, listId) {
     const list = document.getElementById(listId);
     const listItem = document.createElement('li');
@@ -102,6 +108,7 @@ function renderTask(task, listId) {
     list.appendChild(listItem);
 }
 
+// Aufgaben aus Firestore laden und rendern
 async function loadTasks() {
     const querySnapshot = await getDocs(collection(db, "tasks"));
     querySnapshot.forEach((doc) => {
@@ -110,14 +117,16 @@ async function loadTasks() {
     });
 }
 
+// Aufgabenstatus aktualisieren
 async function updateTaskStatus(taskId, newStatus) {
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, { status: newStatus });
-    document.querySelector(`li[data-id='${taskId}']`).remove();
-    loadTasks();
+    document.querySelector(`li[data-id='${taskId}']`).remove(); // Entfernt die Aufgabe aus der aktuellen Liste
+    loadTasks(); // Aktualisiert die Ansicht
 }
 
+// Aufgabe löschen
 async function deleteTask(taskId) {
     await deleteDoc(doc(db, "tasks", taskId));
-    document.querySelector(`li[data-id='${taskId}']`).remove();
+    document.querySelector(`li[data-id='${taskId}']`).remove(); // Entfernt die Aufgabe aus der Ansicht
 }
