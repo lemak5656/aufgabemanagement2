@@ -24,7 +24,7 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
-window.showSection = showSection;
+window.showSection = showSection; // Funktion global verfügbar machen
 
 // Aufgabe hinzufügen
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
@@ -71,11 +71,15 @@ async function saveTaskToDatabase(haus, problem, priorität, foto) {
 
 // Aufgaben aus Firebase laden und rendern
 async function loadTasks() {
-    const tasksSnapshot = await getDocs(collection(db, "tasks"));
+    onSnapshot(collection(db, "tasks"), (snapshot) => {
+        document.getElementById("meldungenList").innerHTML = "";
+        document.getElementById("aufgabenList").innerHTML = "";
+        document.getElementById("archivList").innerHTML = "";
 
-    tasksSnapshot.forEach((doc) => {
-        const task = { id: doc.id, ...doc.data() };
-        renderTask(task, `${task.status}List`);
+        snapshot.forEach((doc) => {
+            const task = { id: doc.id, ...doc.data() };
+            renderTask(task, `${task.status}List`);
+        });
     });
 }
 
@@ -98,10 +102,45 @@ function renderTask(task, listId) {
                 <option value="Hausmeister" ${task.abteilung === "Hausmeister" ? "selected" : ""}>Hausmeister</option>
                 <option value="Rezeption" ${task.abteilung === "Rezeption" ? "selected" : ""}>Rezeption</option>
             </select>
-            <button onclick="moveTaskTo('aufgaben', '${task.id}')">In Arbeit setzen</button>
         </div>
     `;
 
+    // Aktionen hinzufügen
+    const actions = document.createElement('div');
+    actions.style.marginTop = "10px";
+
+    if (listId === "meldungenList") {
+        const inArbeitButton = document.createElement('button');
+        inArbeitButton.textContent = "In Arbeit setzen";
+        inArbeitButton.addEventListener("click", async () => {
+            await updateTaskStatus(task.id, "aufgaben");
+        });
+        actions.appendChild(inArbeitButton);
+    } else if (listId === "aufgabenList") {
+        const erledigtButton = document.createElement('button');
+        erledigtButton.textContent = "Erledigt";
+        erledigtButton.addEventListener("click", async () => {
+            await updateTaskStatus(task.id, "erledigt");
+        });
+
+        const archivierenButton = document.createElement('button');
+        archivierenButton.textContent = "Archivieren";
+        archivierenButton.addEventListener("click", async () => {
+            await updateTaskStatus(task.id, "archiv");
+        });
+
+        actions.appendChild(erledigtButton);
+        actions.appendChild(archivierenButton);
+    } else if (listId === "archivList") {
+        const löschenButton = document.createElement('button');
+        löschenButton.textContent = "Löschen";
+        löschenButton.addEventListener("click", async () => {
+            await deleteTask(task.id);
+        });
+        actions.appendChild(löschenButton);
+    }
+
+    listItem.appendChild(actions);
     list.appendChild(listItem);
 
     // Abteilungsänderung überwachen
@@ -113,14 +152,23 @@ function renderTask(task, listId) {
     });
 }
 
-// Aufgabe in eine andere Liste verschieben
-async function moveTaskTo(targetStatus, taskId) {
+// Aufgabenstatus aktualisieren
+async function updateTaskStatus(taskId, newStatus) {
     try {
-        await updateDoc(doc(db, "tasks", taskId), { status: targetStatus });
-        console.log(`Aufgabe ${taskId} in ${targetStatus} verschoben.`);
-        location.reload(); // Seite neu laden, um aktualisierte Aufgaben zu zeigen
+        await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
+        console.log(`Aufgabe ${taskId} in ${newStatus} verschoben.`);
     } catch (error) {
-        console.error("Fehler beim Verschieben der Aufgabe:", error);
+        console.error("Fehler beim Aktualisieren des Status:", error);
+    }
+}
+
+// Aufgabe löschen
+async function deleteTask(taskId) {
+    try {
+        await deleteDoc(doc(db, "tasks", taskId));
+        console.log(`Aufgabe ${taskId} wurde gelöscht.`);
+    } catch (error) {
+        console.error("Fehler beim Löschen der Aufgabe:", error);
     }
 }
 
@@ -153,5 +201,5 @@ function printSelectedTasks(listId) {
 
 window.printSelectedTasks = printSelectedTasks;
 
-// Aufgaben beim Laden der Seite abrufen
+// Aufgaben laden
 loadTasks();
