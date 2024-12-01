@@ -79,7 +79,7 @@
             margin-top: 5px;
         }
 
-        .filter {
+        .filter, .print-section {
             max-width: 400px;
             margin: 20px auto;
             padding: 10px;
@@ -87,7 +87,7 @@
             border-radius: 5px;
         }
 
-        .filter input {
+        .filter input, .print-section button {
             width: calc(100% - 20px);
             padding: 10px;
         }
@@ -129,8 +129,8 @@
     <section id="meldungen">
         <h2>Meldung Gekommen</h2>
         <div class="filter">
-            <label for="meldungenFilter">Nach Hausname filtern:</label>
-            <input type="text" id="meldungenFilter" placeholder="Hausname eingeben...">
+            <label for="meldungenFilter">Filtern:</label>
+            <input type="text" id="meldungenFilter" placeholder="Nach Haus, Problem, Priorität suchen...">
         </div>
         <ul id="meldungenList"></ul>
     </section>
@@ -139,10 +139,13 @@
     <section id="aufgaben">
         <h2>Offene Aufgaben</h2>
         <div class="filter">
-            <label for="aufgabenFilter">Nach Hausname filtern:</label>
-            <input type="text" id="aufgabenFilter" placeholder="Hausname eingeben...">
+            <label for="aufgabenFilter">Filtern:</label>
+            <input type="text" id="aufgabenFilter" placeholder="Nach Haus, Problem, Priorität suchen...">
         </div>
         <ul id="aufgabenList"></ul>
+        <div class="print-section">
+            <button onclick="printSelectedTasks('aufgabenList')">Ausgewählte Aufgaben drucken</button>
+        </div>
     </section>
 
     <!-- Archiviert -->
