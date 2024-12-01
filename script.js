@@ -17,10 +17,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = 089c18aad823c1319810440f66ee7053; // Ersetze durch deinen Schlüssel
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053";
 
 // Passwortschutz
-const PASSWORD = "uplandparcs"; // Passwort
+const PASSWORD = "uplandparcs";
 document.getElementById('login-button').addEventListener('click', () => {
     const enteredPassword = document.getElementById('password-input').value;
     if (enteredPassword === PASSWORD) {
@@ -72,15 +72,27 @@ document.getElementById('taskForm').addEventListener('submit', async (event) => 
 async function uploadToImgBB(file) {
     const formData = new FormData();
     formData.append("image", file);
+
     try {
         const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
             method: "POST",
-            body: formData
+            body: formData,
         });
+
+        if (!response.ok) {
+            throw new Error(`Fehler beim Hochladen des Fotos: ${response.statusText}`);
+        }
+
         const data = await response.json();
+
+        if (!data || !data.data || !data.data.url) {
+            throw new Error("Unerwartete Antwort vom ImgBB-Server.");
+        }
+
         return data.data.url; // URL des hochgeladenen Bildes
     } catch (error) {
         console.error("Fehler beim Hochladen des Fotos:", error);
+        alert("Fehler beim Hochladen des Fotos. Bitte überprüfen Sie Ihre Internetverbindung.");
         return null;
     }
 }
@@ -124,4 +136,7 @@ async function updateTaskStatus(taskId, newStatus) {
         await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
         console.log(`Aufgabe ${taskId} verschoben nach ${newStatus}.`);
     } catch (error) {
-        console.error("Fehler beim Aktualisieren
+        console.error("Fehler beim Aktualisieren des Status:", error);
+    }
+}
+window.updateTaskStatus
