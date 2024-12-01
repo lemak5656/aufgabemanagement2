@@ -4,242 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aufgabenmanagement</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        nav {
-            background-color: #007bff;
-            padding: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-around;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        section {
-            display: none;
-        }
-        section.active {
-            display: block;
-        }
-        form, table {
-            max-width: 800px;
-            margin: 0 auto;
-            margin-bottom: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-        label, h2 {
-            font-weight: bold;
-            color: #007bff;
-        }
-        input, select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        textarea {
-            resize: vertical;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <nav>
+        <a href="#" onclick="showSection('eintrag')">Eintrag</a>
+        <a href="#" onclick="showSection('meldungen')">Meldung Gekommen</a>
+        <a href="#" onclick="showSection('aufgaben')">Offene Aufgaben</a>
+        <a href="#" onclick="showSection('archiv')">Archiviert</a>
+    </nav>
 
-<nav>
-    <a href="javascript:void(0)" onclick="showPage('eintrag')">Eintrag</a>
-    <a href="javascript:void(0)" onclick="showPage('meldungen')">Meldung Gekommen</a>
-    <a href="javascript:void(0)" onclick="showPage('aufgaben')">Offene Aufgaben</a>
-    <a href="javascript:void(0)" onclick="showPage('archiv')">Archiviert</a>
-</nav>
+    <section id="eintrag" class="active">
+        <h2>Neue Aufgabe hinzufügen</h2>
+        <form id="taskForm">
+            <label for="haus">Haus:</label>
+            <input type="text" id="haus" name="haus" required>
 
-<section id="eintrag" class="active">
-    <h2>Neue Aufgabe hinzufügen</h2>
-    <form id="task-form">
-        <label for="haus">Haus</label>
-        <input type="text" id="haus" placeholder="Hausnummer oder -name" required>
-        <label for="problem">Problem</label>
-        <textarea id="problem" placeholder="Beschreiben Sie das Problem" required></textarea>
-        <label for="priorität">Priorität</label>
-        <select id="priorität" required>
-            <option value="Niedrig">Niedrig</option>
-            <option value="Mittel">Mittel</option>
-            <option value="Hoch">Hoch</option>
-        </select>
-        <label for="photo">Foto hochladen</label>
-        <input type="file" id="photo" accept="image/*">
-        <button type="submit">Hinzufügen</button>
-    </form>
-</section>
+            <label for="problem">Problem:</label>
+            <textarea id="problem" name="problem" required></textarea>
 
-<section id="meldungen">
-    <h2>Meldung Gekommen</h2>
-    <table id="meldung-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Foto</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
-</section>
+            <label for="priorität">Priorität:</label>
+            <select id="priorität" name="priorität" required>
+                <option value="Niedrig">Niedrig</option>
+                <option value="Mittel">Mittel</option>
+                <option value="Hoch">Hoch</option>
+            </select>
 
-<section id="aufgaben">
-    <h2>Offene Aufgaben</h2>
-    <table id="task-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Foto</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
-</section>
+            <label for="foto">Foto hochladen:</label>
+            <input type="file" id="foto" name="foto" accept="image/*">
 
-<section id="archiv">
-    <h2>Archivierte Aufgaben</h2>
-    <table id="archive-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Foto</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
-</section>
+            <button type="submit">Hinzufügen</button>
+        </form>
+    </section>
 
-<script>
-    let meldungen = [];
-    let offeneAufgaben = [];
-    let archiv = [];
+    <section id="meldungen">
+        <h2>Meldung Gekommen</h2>
+        <ul id="meldungenList"></ul>
+    </section>
 
-    function showPage(pageId) {
-        document.querySelectorAll('section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById(pageId).classList.add('active');
-    }
+    <section id="aufgaben">
+        <h2>Offene Aufgaben</h2>
+        <ul id="aufgabenList"></ul>
+    </section>
 
-    document.getElementById('task-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const haus = document.getElementById('haus').value;
-        const problem = document.getElementById('problem').value;
-        const priorität = document.getElementById('priorität').value;
-        const photoFile = document.getElementById('photo').files[0];
-        const photo = photoFile ? URL.createObjectURL(photoFile) : null;
-        const id = Math.random().toString(36).substr(2, 9);
+    <section id="archiv">
+        <h2>Archiviert</h2>
+        <ul id="archivList"></ul>
+    </section>
 
-        const newMeldung = { id, haus, problem, priorität, photo };
-        meldungen.push(newMeldung);
-        updateMeldungen();
-        e.target.reset();
-    });
-
-    function updateMeldungen() {
-        const tbody = document.getElementById('meldung-table').querySelector('tbody');
-        tbody.innerHTML = '';
-        meldungen.forEach(meldung => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${meldung.id}</td>
-                <td>${meldung.haus}</td>
-                <td>${meldung.problem}</td>
-                <td>${meldung.photo ? `<img src="${meldung.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
-                <td>
-                    <button onclick="moveToOffeneAufgaben('${meldung.id}')">In Arbeit setzen</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    function moveToOffeneAufgaben(id) {
-        const index = meldungen.findIndex(m => m.id === id);
-        if (index !== -1) {
-            offeneAufgaben.push(meldungen[index]);
-            meldungen.splice(index, 1);
-            updateMeldungen();
-            updateOffeneAufgaben();
-        }
-    }
-
-    function updateOffeneAufgaben() {
-        const tbody = document.getElementById('task-table').querySelector('tbody');
-        tbody.innerHTML = '';
-        offeneAufgaben.forEach(task => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${task.id}</td>
-                <td>${task.haus}</td>
-                <td>${task.problem}</td>
-                <td>${task.photo ? `<img src="${task.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
-                <td>
-                    <button onclick="archiveTask('${task.id}')">Archivieren</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    function archiveTask(id) {
-        const index = offeneAufgaben.findIndex(t => t.id === id);
-        if (index !== -1) {
-            archiv.push(offeneAufgaben[index]);
-            offeneAufgaben.splice(index, 1);
-            updateOffeneAufgaben();
-            updateArchiv();
-        }
-   
+    <script src="script.js"></script>
+</body>
+</html>
