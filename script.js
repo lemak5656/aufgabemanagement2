@@ -17,20 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ImgBB API-Schlüssel
-const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Dein API-Schlüssel
-
-// Passwortschutz
-const PASSWORD = "uplandparcs";
-document.getElementById('login-button').addEventListener('click', () => {
-    const enteredPassword = document.getElementById('password-input').value;
-    if (enteredPassword === PASSWORD) {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-        loadTasks(); // Aufgaben laden nach Login
-    } else {
-        alert('Falsches Passwort.');
-    }
-});
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053";
 
 // Navigation zwischen Abschnitten
 function showSection(sectionId) {
@@ -61,11 +48,11 @@ document.getElementById('taskForm').addEventListener('submit', async (event) => 
         problem,
         priorität,
         foto: fotoURL,
-        status: "meldungen",
-        erledigt: false
+        status: "meldungen"
     });
 
     document.getElementById('taskForm').reset();
+    alert("Aufgabe erfolgreich hinzugefügt!");
 });
 
 // ImgBB Foto-Upload
@@ -84,15 +71,10 @@ async function uploadToImgBB(file) {
         }
 
         const data = await response.json();
-
-        if (!data || !data.data || !data.data.url) {
-            throw new Error("Unerwartete Antwort vom ImgBB-Server.");
-        }
-
         return data.data.url; // URL des hochgeladenen Bildes
     } catch (error) {
         console.error("Fehler beim Hochladen des Fotos:", error);
-        alert("Fehler beim Hochladen des Fotos. Bitte überprüfen Sie Ihre Internetverbindung.");
+        alert("Fehler beim Hochladen des Fotos.");
         return null;
     }
 }
@@ -122,12 +104,9 @@ function renderTask(task) {
         <strong>Haus:</strong> ${task.haus}<br>
         <strong>Problem:</strong> ${task.problem}<br>
         <strong>Priorität:</strong> ${task.priorität}<br>
-        ${task.foto ? `<img src="${task.foto}" alt="Foto" style="max-width: 200px;">` : ''}
+        ${task.foto ? `<img src="${task.foto}" alt="Foto">` : ''}
         <button onclick="updateTaskStatus('${task.id}', '${task.status === 'meldungen' ? 'aufgaben' : 'archiv'}')">
             ${task.status === 'meldungen' ? 'In Arbeit setzen' : 'Archivieren'}
-        </button>
-        <button onclick="markAsDone('${task.id}', ${!task.erledigt})">
-            ${task.erledigt ? 'Nicht Erledigt' : 'Erledigt'}
         </button>
     `;
     list.appendChild(listItem);
@@ -135,22 +114,9 @@ function renderTask(task) {
 
 // Aufgabenstatus aktualisieren
 async function updateTaskStatus(taskId, newStatus) {
-    try {
-        await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
-        console.log(`Aufgabe ${taskId} verschoben nach ${newStatus}.`);
-    } catch (error) {
-        console.error("Fehler beim Aktualisieren des Status:", error);
-    }
+    await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
 }
 window.updateTaskStatus = updateTaskStatus; // Funktion global verfügbar machen
 
-// Aufgabe als erledigt markieren
-async function markAsDone(taskId, erledigtStatus) {
-    try {
-        await updateDoc(doc(db, "tasks", taskId), { erledigt: erledigtStatus });
-        console.log(`Aufgabe ${taskId} als ${erledigtStatus ? "erledigt" : "nicht erledigt"} markiert.`);
-    } catch (error) {
-        console.error("Fehler beim Markieren als Erledigt:", error);
-    }
-}
-window.markAsDone = markAsDone; // Funktion global verfügbar machen
+// Aufgaben laden, wenn Seite geladen wird
+loadTasks();
