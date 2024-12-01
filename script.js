@@ -1,4 +1,4 @@
-// Firebase Configuration
+// Firebase-Konfiguration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
 
@@ -12,14 +12,14 @@ const firebaseConfig = {
     measurementId: "G-NSPT7LPEQ0"
 };
 
-// Initialize Firebase
+// Firebase initialisieren
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ImgBB API Key
-const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Remplacez par votre clé API ImgBB
+// ImgBB API-Schlüssel
+const imgbbApiKey = "089c18aad823c1319810440f66ee7053"; // Ersetze durch deinen ImgBB API-Schlüssel
 
-// Navigation entre les sections
+// Navigation zwischen den Abschnitten
 function showSection(sectionId) {
     document.querySelectorAll('section').forEach(section => {
         section.classList.remove('active');
@@ -29,7 +29,7 @@ function showSection(sectionId) {
 
 window.showSection = showSection;
 
-// Ajouter une tâche
+// Aufgabe hinzufügen
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -42,7 +42,7 @@ document.getElementById('taskForm').addEventListener('submit', async (event) => 
 
     if (fotoInput.files.length > 0) {
         const file = fotoInput.files[0];
-        fotoURL = await uploadToImgBB(file); // Téléchargez la photo sur ImgBB
+        fotoURL = await uploadToImgBB(file); // Foto auf ImgBB hochladen
     }
 
     await saveTaskToDatabase(haus, problem, priorität, fotoURL);
@@ -50,7 +50,7 @@ document.getElementById('taskForm').addEventListener('submit', async (event) => 
     document.getElementById('taskForm').reset();
 });
 
-// Télécharger une photo sur ImgBB
+// Foto auf ImgBB hochladen
 async function uploadToImgBB(file) {
     const formData = new FormData();
     formData.append("image", file);
@@ -61,14 +61,14 @@ async function uploadToImgBB(file) {
             body: formData,
         });
         const data = await response.json();
-        return data.data.url; // Retourne l'URL de la photo
+        return data.data.url; // URL des hochgeladenen Bildes
     } catch (error) {
-        console.error("Erreur lors du téléchargement de la photo:", error);
+        console.error("Fehler beim Hochladen des Fotos:", error);
         return null;
     }
 }
 
-// Enregistrer une tâche dans Firebase
+// Aufgabe in Firebase speichern
 async function saveTaskToDatabase(haus, problem, priorität, foto) {
     try {
         await addDoc(collection(db, "tasks"), {
@@ -79,14 +79,15 @@ async function saveTaskToDatabase(haus, problem, priorität, foto) {
             status: "meldungen",
             abteilung: "Keine",
             kommentar: "",
+            erledigt: false,
         });
-        console.log("Tâche ajoutée avec succès.");
+        console.log("Aufgabe erfolgreich hinzugefügt.");
     } catch (error) {
-        console.error("Erreur lors de l'ajout de la tâche:", error);
+        console.error("Fehler beim Hinzufügen der Aufgabe:", error);
     }
 }
 
-// Charger et afficher les tâches
+// Aufgaben aus Firebase laden und anzeigen
 async function loadTasks() {
     onSnapshot(collection(db, "tasks"), (snapshot) => {
         document.getElementById("meldungenList").innerHTML = "";
@@ -99,29 +100,30 @@ async function loadTasks() {
             if (document.getElementById(targetList)) {
                 renderTask(task, targetList);
             } else {
-                console.error(`Liste ${targetList} non trouvée.`);
+                console.error(`Liste ${targetList} nicht gefunden.`);
             }
         });
     });
 }
 
-// Afficher une tâche
+// Aufgabe anzeigen
 function renderTask(task, listId) {
     const list = document.getElementById(listId);
 
     if (!list) {
-        console.error(`Liste avec l'ID ${listId} non trouvée.`);
+        console.error(`Liste mit ID ${listId} nicht gefunden.`);
         return;
     }
 
     const listItem = document.createElement('li');
+    listItem.style.color = task.erledigt ? "green" : "red"; // Grün, wenn erledigt, sonst rot
 
     listItem.innerHTML = `
         <input type="checkbox" class="task-checkbox">
         <strong>Haus:</strong> ${task.haus}<br>
         <strong>Problem:</strong> ${task.problem}<br>
         <strong>Priorität:</strong> ${task.priorität}<br>
-        ${task.foto ? `<img src="${task.foto}" alt="Photo" style="max-width: 200px;">` : ''}
+        ${task.foto ? `<img src="${task.foto}" alt="Foto" style="max-width: 200px;">` : ''}
         <div>
             <label for="abteilung">Abteilung:</label>
             <select class="abteilung" data-id="${task.id}">
@@ -132,31 +134,42 @@ function renderTask(task, listId) {
             </select>
         </div>
         <div>
-            <textarea class="kommentar" placeholder="Ajouter un commentaire..." data-id="${task.id}">${task.kommentar || ""}</textarea>
+            <textarea class="kommentar" placeholder="Kommentar hinzufügen..." data-id="${task.id}">${task.kommentar || ""}</textarea>
+        </div>
+        <div style="margin-top: 10px;">
+            ${task.erledigt ? "<strong>Erledigt</strong>" : ""}
         </div>
     `;
 
-    // Ajouter des actions
+    // Aktionen hinzufügen
     const actions = document.createElement('div');
     actions.style.marginTop = "10px";
 
     if (listId === "meldungenList") {
         const inArbeitButton = document.createElement('button');
-        inArbeitButton.textContent = "Mettre en travail";
+        inArbeitButton.textContent = "In Arbeit setzen";
         inArbeitButton.addEventListener("click", async () => {
             await updateTaskStatus(task.id, "aufgaben");
         });
         actions.appendChild(inArbeitButton);
     } else if (listId === "aufgabenList") {
+        const erledigtButton = document.createElement('button');
+        erledigtButton.textContent = "Erledigt";
+        erledigtButton.addEventListener("click", async () => {
+            await updateTaskErledigt(task.id, !task.erledigt); // Status wechseln
+        });
+
         const archivierenButton = document.createElement('button');
-        archivierenButton.textContent = "Archiver";
+        archivierenButton.textContent = "Archivieren";
         archivierenButton.addEventListener("click", async () => {
             await updateTaskStatus(task.id, "archiv");
         });
+
+        actions.appendChild(erledigtButton);
         actions.appendChild(archivierenButton);
     } else if (listId === "archivList") {
         const löschenButton = document.createElement('button');
-        löschenButton.textContent = "Supprimer";
+        löschenButton.textContent = "Löschen";
         löschenButton.addEventListener("click", async () => {
             await deleteTask(task.id);
         });
@@ -166,34 +179,36 @@ function renderTask(task, listId) {
     listItem.appendChild(actions);
     list.appendChild(listItem);
 
-    // Suivre les changements de commentaire
+    // Abteilungsänderung überwachen
+    listItem.querySelector(".abteilung").addEventListener("change", async (e) => {
+        const newAbteilung = e.target.value;
+        const taskId = e.target.dataset.id;
+        await updateDoc(doc(db, "tasks", taskId), { abteilung: newAbteilung });
+        console.log(`Abteilung für Aufgabe ${taskId} aktualisiert.`);
+    });
+
+    // Kommentaränderung überwachen
     listItem.querySelector(".kommentar").addEventListener("input", async (e) => {
         const kommentar = e.target.value;
         const taskId = e.target.dataset.id;
         await updateDoc(doc(db, "tasks", taskId), { kommentar });
-        console.log(`Commentaire mis à jour pour la tâche ${taskId}.`);
+        console.log(`Kommentar für Aufgabe ${taskId} aktualisiert.`);
     });
 }
 
-// Mettre à jour le statut d'une tâche
+// Aufgabenstatus aktualisieren
 async function updateTaskStatus(taskId, newStatus) {
     try {
         await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
-        console.log(`Tâche ${taskId} déplacée vers ${newStatus}.`);
+        console.log(`Aufgabe ${taskId} nach ${newStatus} verschoben.`);
     } catch (error) {
-        console.error("Erreur lors de la mise à jour du statut:", error);
+        console.error("Fehler beim Aktualisieren des Status:", error);
     }
 }
 
-// Supprimer une tâche
-async function deleteTask(taskId) {
+// Aufgabe erledigt markieren
+async function updateTaskErledigt(taskId, erledigtStatus) {
     try {
-        await deleteDoc(doc(db, "tasks", taskId));
-        console.log(`Tâche ${taskId} supprimée.`);
-    } catch (error) {
-        console.error("Erreur lors de la suppression de la tâche:", error);
-    }
-}
-
-// Charger les tâches au démarrage
-loadTasks();
+        await updateDoc(doc(db, "tasks", taskId), { erledigt: erledigtStatus });
+        console.log(`Aufgabe ${taskId} als ${erledigtStatus ? "erledigt" : "nicht erledigt"} markiert.`);
+    } catch (
