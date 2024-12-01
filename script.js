@@ -40,7 +40,7 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add('active');
 }
 
-window.showSection = showSection;
+window.showSection = showSection; // Funktion global verfügbar machen
 
 // Aufgaben hinzufügen
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
@@ -127,4 +127,19 @@ async function updateTaskStatus(taskId, newStatus) {
     try {
         await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
         console.log(`Aufgabe ${taskId} verschoben nach ${newStatus}.`);
-    } catch (error)
+    } catch (error) {
+        console.error("Fehler beim Aktualisieren des Status:", error);
+    }
+}
+window.updateTaskStatus = updateTaskStatus; // Funktion global verfügbar machen
+
+// Aufgabe als erledigt markieren
+async function markAsDone(taskId, erledigtStatus) {
+    try {
+        await updateDoc(doc(db, "tasks", taskId), { erledigt: erledigtStatus });
+        console.log(`Aufgabe ${taskId} als ${erledigtStatus ? "erledigt" : "nicht erledigt"} markiert.`);
+    } catch (error) {
+        console.error("Fehler beim Markieren als Erledigt:", error);
+    }
+}
+window.markAsDone = markAsDone; // Funktion global verfügbar machen
