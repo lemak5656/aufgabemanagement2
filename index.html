@@ -5,35 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aufgabenmanagement</title>
     <style>
-        /* Passwortschutz */
-        #login-container {
+        /* Basisdesign */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        nav {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f3f3f3;
-        }
-
-        #login-container input {
-            margin: 10px;
+            background-color: #007bff;
             padding: 10px;
-            font-size: 16px;
         }
 
-        #login-container button {
-            padding: 10px 20px;
-            font-size: 16px;
+        nav button {
+            background: none;
+            color: white;
+            border: none;
+            margin: 0 10px;
             cursor: pointer;
+            font-size: 16px;
         }
 
-        #main-content {
-            display: none;
+        nav button:hover {
+            text-decoration: underline;
         }
 
-        /* Aufgabenmanagement */
         section {
             display: none;
+            padding: 20px;
         }
 
         section.active {
@@ -41,79 +43,90 @@
         }
 
         ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
         }
 
         li {
-            margin: 10px 0;
+            margin-bottom: 10px;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            background-color: #fff;
         }
 
-        li.erledigt {
-            background-color: #d4edda;
-            color: #155724;
+        li img {
+            max-width: 200px;
+            display: block;
+            margin-top: 10px;
         }
 
-        li.nichterledigt {
-            background-color: #f8d7da;
-            color: #721c24;
+        button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        form input, form select, form button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Passwortschutz -->
-    <div id="login-container">
-        <h1>Passwort eingeben</h1>
-        <input type="password" id="password-input" placeholder="Passwort">
-        <button id="login-button">Einloggen</button>
-    </div>
+    <nav>
+        <button onclick="showSection('meldungen')">Meldung Gekommen</button>
+        <button onclick="showSection('aufgaben')">Offene Aufgaben</button>
+        <button onclick="showSection('archiv')">Archiv</button>
+        <button onclick="showSection('add-task')">Neue Aufgabe</button>
+    </nav>
 
-    <!-- Hauptinhalt -->
-    <div id="main-content">
-        <nav>
-            <button onclick="showSection('meldungen')">Meldung Gekommen</button>
-            <button onclick="showSection('aufgaben')">Offene Aufgaben</button>
-            <button onclick="showSection('archiv')">Archiv</button>
-            <button onclick="showSection('add-task')">Neue Aufgabe</button>
-        </nav>
+    <section id="meldungen" class="active">
+        <h2>Meldung Gekommen</h2>
+        <ul id="meldungenList"></ul>
+    </section>
 
-        <!-- Meldungen -->
-        <section id="meldungen">
-            <h2>Meldung Gekommen</h2>
-            <ul id="meldungenList"></ul>
-        </section>
+    <section id="aufgaben">
+        <h2>Offene Aufgaben</h2>
+        <ul id="aufgabenList"></ul>
+    </section>
 
-        <!-- Offene Aufgaben -->
-        <section id="aufgaben">
-            <h2>Offene Aufgaben</h2>
-            <ul id="aufgabenList"></ul>
-        </section>
+    <section id="archiv">
+        <h2>Archiv</h2>
+        <ul id="archivList"></ul>
+    </section>
 
-        <!-- Archiv -->
-        <section id="archiv">
-            <h2>Archiv</h2>
-            <ul id="archivList"></ul>
-        </section>
-
-        <!-- Aufgabe hinzufügen -->
-        <section id="add-task">
-            <h2>Neue Aufgabe hinzufügen</h2>
-            <form id="taskForm">
-                <input type="text" id="haus" placeholder="Haus" required>
-                <input type="text" id="problem" placeholder="Problem" required>
-                <select id="priorität" required>
-                    <option value="Hoch">Hoch</option>
-                    <option value="Mittel">Mittel</option>
-                    <option value="Niedrig">Niedrig</option>
-                </select>
-                <input type="file" id="foto" accept="image/*">
-                <button type="submit">Aufgabe hinzufügen</button>
-            </form>
-        </section>
-    </div>
+    <section id="add-task">
+        <h2>Neue Aufgabe hinzufügen</h2>
+        <form id="taskForm">
+            <input type="text" id="haus" placeholder="Hausnummer oder -name" required>
+            <input type="text" id="problem" placeholder="Problem" required>
+            <select id="priorität" required>
+                <option value="Hoch">Hoch</option>
+                <option value="Mittel">Mittel</option>
+                <option value="Niedrig">Niedrig</option>
+            </select>
+            <input type="file" id="foto" accept="image/*">
+            <button type="submit">Aufgabe hinzufügen</button>
+        </form>
+    </section>
 
     <script type="module" src="script.js"></script>
 </body>
