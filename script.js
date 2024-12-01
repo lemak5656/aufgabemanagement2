@@ -1,3 +1,18 @@
+// Firebase-Konfiguration
+const firebaseConfig = {
+    apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
+    authDomain: "aufgabemanagement.firebaseapp.com",
+    projectId: "aufgabemanagement",
+    storageBucket: "aufgabemanagement.appspot.com",
+    messagingSenderId: "868800147456",
+    appId: "1:868800147456:web:f4f8cc2e39100f819a68e5",
+    measurementId: "G-NSPT7LPEQ0"
+};
+
+// Firebase initialisieren
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 document.addEventListener('DOMContentLoaded', () => {
     showSection('eintrag');
 
@@ -6,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         addTask();
     });
+
+    loadTasks();
 });
 
 function showSection(sectionId) {
@@ -24,15 +41,23 @@ function addTask() {
     const foto = fotoInput.files[0];
 
     const task = {
-        id: Date.now(),
         haus,
         problem,
         priorität,
-        foto: foto ? URL.createObjectURL(foto) : null
+        foto: foto ? URL.createObjectURL(foto) : null,
+        status: 'meldungen',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    renderTask(task, 'meldungenList');
-    document.getElementById('taskForm').reset();
+    db.collection('tasks').add(task)
+        .then((docRef) => {
+            console.log("Aufgabe hinzugefügt mit ID: ", docRef.id);
+            renderTask({ id: docRef.id, ...task }, 'meldungenList');
+            document.getElementById('taskForm').reset();
+        })
+        .catch((error) => {
+            console.error("Fehler beim Hinzufügen der Aufgabe: ", error);
+        });
 }
 
 function renderTask(task, listId) {
@@ -49,24 +74,6 @@ function renderTask(task, listId) {
     if (task.foto) {
         const img = document.createElement('img');
         img.src = task.foto;
-        listItem.appendChild(img);
-    }
-
-    const actions = document.createElement('div');
-
-    if (listId === 'meldungenList') {
-        const inArbeitButton = document.createElement('button');
-        inArbeitButton.textContent = 'In Arbeit setzen';
-        inArbeitButton.addEventListener('click', () => moveTask(task.id, 'aufgabenList'));
-        actions.appendChild(inArbeitButton);
-    } else if (listId === 'aufgabenList') {
-        const archivierenButton = document.createElement('button');
-        archivierenButton.textContent = 'Archivieren';
-        archivierenButton.addEventListener('click', () => moveTask(task.id, 'archivList'));
-        actions.appendChild(archivierenButton);
-    } else if (listId === 'archivList') {
-        const löschenButton = document.createElement('button');
-        löschenButton.textContent = 'Löschen';
-        löschenButton.addEventListener('click
+        listItem
 ::contentReference[oaicite:0]{index=0}
  
