@@ -75,7 +75,7 @@
             margin-top: 10px;
         }
 
-        button {
+        button, select {
             margin-top: 5px;
         }
 
@@ -87,8 +87,9 @@
             border-radius: 5px;
         }
 
-        .filter label {
-            font-weight: bold;
+        .filter input {
+            width: calc(100% - 20px);
+            padding: 10px;
         }
     </style>
 </head>
@@ -100,6 +101,7 @@
         <a href="#" onclick="showSection('archiv')">Archiviert</a>
     </nav>
 
+    <!-- Eintrag -->
     <section id="eintrag" class="active">
         <h2>Neue Aufgabe hinzufügen</h2>
         <form id="taskForm">
@@ -123,25 +125,27 @@
         </form>
     </section>
 
+    <!-- Meldung Gekommen -->
     <section id="meldungen">
         <h2>Meldung Gekommen</h2>
+        <div class="filter">
+            <label for="meldungenFilter">Nach Hausname filtern:</label>
+            <input type="text" id="meldungenFilter" placeholder="Hausname eingeben...">
+        </div>
         <ul id="meldungenList"></ul>
     </section>
 
+    <!-- Offene Aufgaben -->
     <section id="aufgaben">
         <h2>Offene Aufgaben</h2>
         <div class="filter">
-            <label for="filter">Nach Abteilung filtern:</label>
-            <select id="filter" onchange="filterTasks()">
-                <option value="Alle">Alle</option>
-                <option value="Hausverwaltung">Hausverwaltung</option>
-                <option value="Hausmeister">Hausmeister</option>
-                <option value="Rezeption">Rezeption</option>
-            </select>
+            <label for="aufgabenFilter">Nach Hausname filtern:</label>
+            <input type="text" id="aufgabenFilter" placeholder="Hausname eingeben...">
         </div>
         <ul id="aufgabenList"></ul>
     </section>
 
+    <!-- Archiviert -->
     <section id="archiv">
         <h2>Archiviert</h2>
         <ul id="archivList"></ul>
