@@ -83,14 +83,14 @@
 
 <nav>
     <a href="javascript:void(0)" onclick="showPage('eintrag')">Eintrag</a>
-    <a href="javascript:void(0)" onclick="showPage('aufgaben')">Offene Aufgaben</a>
     <a href="javascript:void(0)" onclick="showPage('meldungen')">Meldung Gekommen</a>
+    <a href="javascript:void(0)" onclick="showPage('aufgaben')">Offene Aufgaben</a>
     <a href="javascript:void(0)" onclick="showPage('archiv')">Archiviert</a>
 </nav>
 
 <section id="eintrag" class="active">
+    <h2>Neue Aufgabe hinzufügen</h2>
     <form id="task-form">
-        <h2>Neue Aufgabe hinzufügen</h2>
         <label for="haus">Haus</label>
         <input type="text" id="haus" placeholder="Hausnummer oder -name" required>
         <label for="problem">Problem</label>
@@ -101,27 +101,10 @@
             <option value="Mittel">Mittel</option>
             <option value="Hoch">Hoch</option>
         </select>
+        <label for="photo">Foto hochladen</label>
+        <input type="file" id="photo" accept="image/*">
         <button type="submit">Hinzufügen</button>
     </form>
-</section>
-
-<section id="aufgaben">
-    <h2>Offene Aufgaben</h2>
-    <table id="task-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Haus</th>
-                <th>Problem</th>
-                <th>Priorität</th>
-                <th>Status</th>
-                <th>Aktionen</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dynamischer Inhalt -->
-        </tbody>
-    </table>
 </section>
 
 <section id="meldungen">
@@ -132,8 +115,7 @@
                 <th>ID</th>
                 <th>Haus</th>
                 <th>Problem</th>
-                <th>Priorität</th>
-                <th>Status</th>
+                <th>Foto</th>
                 <th>Abteilung</th>
                 <th>Aktionen</th>
             </tr>
@@ -144,15 +126,14 @@
     </table>
 </section>
 
-<section id="archiv">
-    <h2>Archivierte Aufgaben</h2>
-    <table id="archive-table">
+<section id="aufgaben">
+    <h2>Offene Aufgaben</h2>
+    <table id="task-table">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Haus</th>
                 <th>Problem</th>
-                <th>Priorität</th>
                 <th>Status</th>
                 <th>Aktionen</th>
             </tr>
@@ -161,10 +142,18 @@
             <!-- Dynamischer Inhalt -->
         </tbody>
     </table>
+    <button onclick="printSelected()">Ausgewählte Aufgaben drucken</button>
+</section>
+
+<section id="archiv">
+    <h2>Archivierte Aufgaben</h2>
+    <p>Keine archivierten Aufgaben.</p>
 </section>
 
 <script>
-    // Fonction pour la navigation entre les pages
+    let meldungen = [];
+    let offeneAufgaben = [];
+
     function showPage(pageId) {
         document.querySelectorAll('section').forEach(section => {
             section.classList.remove('active');
@@ -172,33 +161,95 @@
         document.getElementById(pageId).classList.add('active');
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        showPage('eintrag'); // Charger la page par défaut
-    });
-
-    // Ajout d'une tâche (remplacez par votre logique Firebase si nécessaire)
     document.getElementById('task-form').addEventListener('submit', function (e) {
         e.preventDefault();
         const haus = document.getElementById('haus').value;
         const problem = document.getElementById('problem').value;
         const priorität = document.getElementById('priorität').value;
+        const photo = document.getElementById('photo').files[0];
+        const id = Math.random().toString(36).substr(2, 9);
 
-        // Simule l'ajout à une liste de tâches
-        const tbody = document.querySelector('#task-table tbody');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>${Math.random().toString(36).substr(2, 5)}</td>
-            <td>${haus}</td>
-            <td>${problem}</td>
-            <td>${priorität}</td>
-            <td>Offen</td>
-            <td><button onclick="alert('Archiviert!')">Archivieren</button></td>
-        `;
-        tbody.appendChild(newRow);
-
-        // Réinitialiser le formulaire
+        const newMeldung = {
+            id,
+            haus,
+            problem,
+            priorität,
+            photo: photo ? URL.createObjectURL(photo) : null
+        };
+        meldungen.push(newMeldung);
+        updateMeldungen();
         e.target.reset();
     });
+
+    function updateMeldungen() {
+        const tbody = document.getElementById('meldung-table').querySelector('tbody');
+        tbody.innerHTML = '';
+        meldungen.forEach(meldung => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${meldung.id}</td>
+                <td>${meldung.haus}</td>
+                <td>${meldung.problem}</td>
+                <td>${meldung.photo ? `<img src="${meldung.photo}" alt="Foto" style="width: 50px;">` : 'Keine'}</td>
+                <td>
+                    <select onchange="assignAbteilung('${meldung.id}', this.value)">
+                        <option value="">Keine</option>
+                        <option value="Technik">Technik</option>
+                        <option value="Hauswirtschaft">Hauswirtschaft</option>
+                        <option value="Bau">Bau</option>
+                    </select>
+                </td>
+                <td>
+                    <button onclick="setToWork('${meldung.id}')">In Arbeit setzen</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function assignAbteilung(id, abteilung) {
+        const meldung = meldungen.find(m => m.id === id);
+        if (meldung) meldung.abteilung = abteilung;
+    }
+
+    function setToWork(id) {
+        const meldungIndex = meldungen.findIndex(m => m.id === id);
+        if (meldungIndex !== -1) {
+            offeneAufgaben.push(meldungen[meldungIndex]);
+            meldungen.splice(meldungIndex, 1);
+            updateMeldungen();
+            updateOffeneAufgaben();
+        }
+    }
+
+    function updateOffeneAufgaben() {
+        const tbody = document.getElementById('task-table').querySelector('tbody');
+        tbody.innerHTML = '';
+        offeneAufgaben.forEach(task => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${task.id}</td>
+                <td>${task.haus}</td>
+                <td>${task.problem}</td>
+                <td>In Arbeit</td>
+                <td><button onclick="archiveTask('${task.id}')">Archivieren</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function archiveTask(id) {
+        offeneAufgaben = offeneAufgaben.filter(task => task.id !== id);
+        updateOffeneAufgaben();
+    }
+
+    function printSelected() {
+        const printContent = document.getElementById('task-table').outerHTML;
+        const printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write(`<html><head><title>Ausgewählte Aufgaben</title></head><body>${printContent}</body></html>`);
+        printWindow.document.close();
+        printWindow.print();
+    }
 </script>
 
 </body>
