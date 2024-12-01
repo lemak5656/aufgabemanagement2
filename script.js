@@ -1,4 +1,22 @@
-// Funktion zur Navigation
+// Firebase-Konfiguration
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyD2HoPzrR_xeeT3YM2INtSGFmh7yZH2-x0",
+    authDomain: "aufgabemanagement.firebaseapp.com",
+    projectId: "aufgabemanagement",
+    storageBucket: "aufgabemanagement.firebasestorage.app",
+    messagingSenderId: "868800147456",
+    appId: "1:868800147456:web:f4f8cc2e39100f819a68e5",
+    measurementId: "G-NSPT7LPEQ0"
+};
+
+// Firebase initialisieren
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Navigation zwischen den Abschnitten
 function showSection(sectionId) {
     document.querySelectorAll('section').forEach(section => {
         section.classList.remove('active');
@@ -8,7 +26,7 @@ function showSection(sectionId) {
 
 window.showSection = showSection;
 
-// Aufgaben hinzufügen
+// Aufgabe hinzufügen
 document.getElementById('taskForm').addEventListener('submit', async (event) => {
     event.preventDefault();
 
